@@ -31,6 +31,7 @@ test.describe('pantalla principal', () => {
   test('las siete columnas caben en una fila en móvil y las tarjetas son 2×2', async ({ page, isMobile }) => {
     test.skip(!isMobile);
     await page.goto('/');
+    await expect(page.locator('a.card')).toHaveCount(4); // esperar al montaje de la vista
     const tops = await page.locator('.week-day').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
     expect(new Set(tops).size).toBe(1);
     const boxes = await page.locator('a.card').evaluateAll((els) =>
@@ -53,9 +54,9 @@ test.describe('pantalla principal', () => {
       expect(b.width).toBeGreaterThanOrEqual(44);
       expect(b.height).toBeGreaterThanOrEqual(44);
     }
-    for (const route of ['#/vuelos', '#/hotel', '#/calendario', '#/checklist']) {
+    for (const route of ['#/vuelos', '#/hotel', '#/calendario', '#/calendario/2026-12-09', '#/calendario/2026-12-10', '#/checklist']) {
       await page.goto(`/${route}`);
-      for (const el of await page.locator('a.back, a.btn, a.daytab, .checks label, button').all()) {
+      for (const el of await page.locator('a.back, a.btn, a.daytab, .checks label, .it-row, button').all()) {
         const b = await el.boundingBox();
         if (!b) continue;
         expect(b.height, `${route} alto`).toBeGreaterThanOrEqual(44);

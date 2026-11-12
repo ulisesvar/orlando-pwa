@@ -139,7 +139,7 @@ export function hotelView(trip) {
   );
 }
 
-export function calendarView(trip, selected) {
+export function calendarView(trip, selected, recorrido = null) {
   const sel = trip.days.find((d) => d.date === selected) ?? null;
   const current = sel ?? trip.days[0];
   return page(
@@ -180,7 +180,7 @@ export function calendarView(trip, selected) {
         current.items.map((t) => h('li', {}, t)),
       ),
     ),
-    h('p', { class: 'note' }, 'No hay horarios definidos para las actividades; se agregarán cuando estén confirmados.'),
+    recorrido ?? h('p', { class: 'note' }, 'No hay horarios definidos para las actividades; se agregarán cuando estén confirmados.'),
   );
 }
 
@@ -301,5 +301,104 @@ export function sessionOnlyNote() {
     'p',
     { class: 'note', role: 'status' },
     'Este navegador no permite guardar el acceso: tendrás que escribir tu correo de nuevo al cerrar la aplicación.',
+  );
+}
+
+const CATEGORY_LABEL = {
+  traslado: 'Traslado',
+  atraccion: 'Atracción',
+  personaje: 'Personaje',
+  comida: 'Comida',
+  descanso: 'Descanso',
+  espectaculo: 'Espectáculo',
+};
+
+const progressText = (p) => `Realizadas: ${p.done} de ${p.total}`;
+
+// Subsección «Recorrido» de Calendario: se monta bajo la agenda del día cuando existe un recorrido para esa fecha.
+export function recorridoView(day, tracker) {
+  const date = day.date;
+  const summary = h('section', { class: 'panel it-summary', 'aria-label': 'Progreso del día', id: 'it-summary' });
+  const items = new Map();
+
+  const refresh = () => {
+    const p = tracker.progress(date);
+    const next = tracker.next(date);
+    summary.replaceChildren(
+      h('p', { class: 'it-progress', role: 'status', id: 'it-progress' }, progressText(p)),
+      h('progress', { class: 'it-bar', max: p.total, value: p.done, 'aria-label': 'Actividades realizadas' }),
+      next
+        ? h('p', { class: 'it-next' }, h('strong', {}, 'Siguiente: '), `${next.label} · ${next.name}`)
+        : h('p', { class: 'it-next' }, h('strong', {}, '¡Recorrido completo! '), 'No quedan actividades pendientes.'),
+    );
+    for (const a of day.activities) {
+      const { li, flag } = items.get(a.id);
+      const isNext = !!next && next.id === a.id;
+      li.className = `it-item${tracker.isDone(date, a.id) ? ' st-done' : ''}${isNext ? ' is-next' : ''}`;
+      flag.hidden = !isNext;
+    }
+  };
+
+  const activity = (a) => {
+    const cid = `it-${a.id}`;
+    const flag = h('span', { class: 'tag tag-next', hidden: true }, 'Siguiente');
+    const li = h(
+      'li',
+      { class: 'it-item' },
+      h('input', {
+        type: 'checkbox',
+        id: cid,
+        class: 'it-check',
+        checked: tracker.isDone(date, a.id),
+        onchange: (e) => {
+          tracker.set(date, a.id, e.target.checked);
+          refresh();
+        },
+      }),
+      h(
+        'label',
+        { for: cid, class: 'it-row' },
+        h('span', { class: 'it-box' }, icon('check')),
+        h('span', { class: 'it-time' }, a.label),
+        h('span', { class: 'it-name' }, a.name),
+      ),
+      h(
+        'div',
+        { class: 'it-body' },
+        h(
+          'p',
+          { class: 'it-tags' },
+          flag,
+          h('span', { class: `tag prio-${a.priority}` }, a.priority.charAt(0).toUpperCase() + a.priority.slice(1)),
+          h('span', { class: 'tag' }, CATEGORY_LABEL[a.category]),
+          a.provisional ? h('span', { class: 'tag tag-prov' }, 'Horario provisional') : null,
+        ),
+        h('p', {}, a.description),
+        h('p', { class: 'meta' }, `Zona: ${a.zone}`),
+        a.notes ? h('p', { class: 'it-note' }, h('strong', {}, 'Observación: '), a.notes) : null,
+        a.alternative ? h('p', { class: 'it-note' }, h('strong', {}, 'Alternativa: '), a.alternative) : null,
+      ),
+    );
+    items.set(a.id, { li, flag });
+    return li;
+  };
+
+  const list = h('ol', { class: 'it-list' }, day.activities.map(activity));
+  refresh();
+  return h(
+    'section',
+    { class: 'recorrido', 'aria-labelledby': 'recorrido-h' },
+    h('h2', { id: 'recorrido-h', class: 'recorrido-title' }, `Recorrido: ${day.title}`),
+    h('p', { class: 'note warn-prov', id: 'it-disclaimer' }, day.disclaimer),
+    summary,
+    list,
+    day.sources.length
+      ? h(
+          'p',
+          { class: 'note' },
+          'Fuentes oficiales para verificar: ',
+          day.sources.flatMap((s, i) => [i ? ' · ' : '', extLink(s.url, 'inline-link', s.label)]),
+        )
+      : null,
   );
 }

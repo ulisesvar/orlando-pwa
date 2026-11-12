@@ -1,6 +1,7 @@
 import { validateTrip } from './validate.js';
 import { startRouter } from './router.js';
 import { createChecklist } from './checklist.js';
+import { validateItineraries, createItineraryTracker } from './itinerary.js';
 import { storage } from './storage.js';
 import * as v from './views.js';
 import { isAuthorized, saveAuthorization, clearAuthorization, normalizeEmail } from './auth.js';
@@ -8,6 +9,8 @@ import { isAuthorized, saveAuthorization, clearAuthorization, normalizeEmail } f
 const root = document.getElementById('app');
 let trip = null;
 let checklist = null;
+let itineraries = null;
+let tracker = null;
 let allowedEmails = [];
 let persistentAccess = true;
 let currentRoute = { name: 'home' };
@@ -27,6 +30,12 @@ async function loadTrip() {
   return validateTrip(await res.json());
 }
 
+async function loadItineraries() {
+  const res = await fetch('./data/itineraries.json', { cache: 'no-cache' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return validateItineraries(await res.json());
+}
+
 let firstRender = true;
 function mount(nodes, title) {
   root.replaceChildren(...nodes.flat());
@@ -39,6 +48,7 @@ function mount(nodes, title) {
 }
 
 function render(route) {
+  if (route.name === 'redirect') return window.location.replace(route.to);
   currentRoute = route;
   if (!allowedEmails.length) return mount(v.errorView('No se pudo cargar la configuración de acceso.'), 'Error');
   if (!isAuthorized(allowedEmails))
@@ -73,8 +83,12 @@ function render(route) {
       return mount(v.flightsView(trip), 'Vuelos');
     case 'hotel':
       return mount(v.hotelView(trip), 'Hotel');
-    case 'calendario':
-      return mount(v.calendarView(trip, route.date), 'Calendario');
+    case 'calendario': {
+      // El recorrido se determina por la fecha seleccionada (o la primera si no hay ninguna).
+      const date = route.date ?? trip.days[0].date;
+      const day = itineraries?.days.find((d) => d.date === date);
+      return mount(v.calendarView(trip, route.date, day ? v.recorridoView(day, tracker) : null), 'Calendario');
+    }
     case 'checklist':
       return renderChecklist();
     default:
@@ -123,6 +137,14 @@ try {
 } catch (e) {
   console.error(e instanceof Error ? e.message : e);
   trip = null;
+}
+// El recorrido falla de forma independiente: el resto de la app sigue disponible.
+try {
+  itineraries = await loadItineraries();
+  tracker = createItineraryTracker(itineraries.days, storage);
+} catch (e) {
+  console.error(e instanceof Error ? e.message : e);
+  itineraries = null;
 }
 startRouter(render);
 registerServiceWorker();

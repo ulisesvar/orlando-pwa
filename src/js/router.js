@@ -11,6 +11,11 @@ export function parseRoute(hash) {
     if (arg === undefined) return { name };
     return isRealDate(arg) ? { name, date: arg } : { name: 'notfound' };
   }
+  // Ruta heredada: el recorrido ahora vive dentro de Calendario.
+  if (name === 'itinerarios') {
+    if (arg === undefined) return { name: 'redirect', to: routeHref('calendario') };
+    return isRealDate(arg) ? { name: 'redirect', to: routeHref('calendario', arg) } : { name: 'notfound' };
+  }
   return { name: 'notfound' };
 }
 

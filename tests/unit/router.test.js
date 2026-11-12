@@ -9,8 +9,21 @@ describe('router', () => {
     expect(parseRoute('#/calendario/2026-12-07')).toEqual({ name: 'calendario', date: '2026-12-07' });
     expect(parseRoute('#/hotel/')).toEqual({ name: 'hotel' });
   });
+  it('las rutas heredadas de itinerarios redirigen a Calendario', () => {
+    expect(parseRoute('#/itinerarios')).toEqual({ name: 'redirect', to: '#/calendario' });
+    expect(parseRoute('#/itinerarios/2026-12-09')).toEqual({ name: 'redirect', to: '#/calendario/2026-12-09' });
+  });
   it('rutas inválidas o manipuladas', () => {
-    for (const h of ['#/nada', '#/calendario/2026-13-40', '#/calendario/<script>', '#/hotel/x', '#/a/b/c', '#/../etc/passwd'])
+    for (const h of [
+      '#/nada',
+      '#/calendario/2026-13-40',
+      '#/calendario/<script>',
+      '#/hotel/x',
+      '#/a/b/c',
+      '#/itinerarios/2026-02-31',
+      '#/itinerarios/x/y',
+      '#/../etc/passwd',
+    ])
       expect(parseRoute(h)).toEqual({ name: 'notfound' });
   });
   it('genera hrefs', () => {
