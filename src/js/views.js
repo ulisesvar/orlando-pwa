@@ -125,10 +125,8 @@ export function hotelView(trip) {
         { class: 'facts' },
         h('dt', {}, 'Dirección'),
         h('dd', {}, ht.address ?? 'Por confirmar con el hotel'),
-        h('dt', {}, 'Check-in'),
-        h('dd', {}, ht.checkIn ?? 'Por confirmar'),
-        h('dt', {}, 'Checkout'),
-        h('dd', {}, ht.checkOut ?? 'Por confirmar'),
+        ...(ht.checkIn ? [h('dt', {}, 'Check-in'), h('dd', {}, ht.checkIn)] : []),
+        ...(ht.checkOut ? [h('dt', {}, 'Checkout'), h('dd', {}, ht.checkOut)] : []),
       ),
     ),
     h(
@@ -253,3 +251,15 @@ export const notFoundView = () =>
     h('a', { href: routeHref('home'), class: 'btn btn-primary' }, 'Ir al inicio'),
   );
 export { cap, weekdayName };
+
+export function accessView({ onSubmit }) {
+  const input = h('input', { id: 'family-email', type: 'email', required: true, autocomplete: 'email', inputmode: 'email', placeholder: 'nombre@correo.com', style: 'width:100%;padding:12px;font:inherit;margin:8px 0 16px' });
+  const feedback = h('p', { role: 'alert', 'aria-live': 'polite' });
+  return [h('header', { class: 'hero' }, h('p', { class: 'eyebrow' }, 'NUESTRO VIAJE'), h('h1', { id: 'page-title', tabindex: '-1' }, 'Orlando 2026')),
+    h('section', { class: 'panel' }, h('h2', {}, 'Bienvenido'), h('p', {}, 'Escribe tu correo autorizado. Solo tendrás que hacerlo una vez en este dispositivo.'),
+      h('form', { onsubmit: (event) => { event.preventDefault(); onSubmit(input.value, feedback); } }, h('label', { for: 'family-email' }, 'Correo electrónico'), input, h('button', { type: 'submit', class: 'btn btn-primary' }, 'Entrar'), feedback))];
+}
+
+export function signOutView(onSignOut) {
+  return h('div', { class: 'actions' }, h('button', { type: 'button', class: 'btn btn-secondary', onclick: onSignOut }, 'Cambiar usuario'));
+}
