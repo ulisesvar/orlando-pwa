@@ -1,0 +1,255 @@
+import { h, icon } from './dom.js';
+import { routeHref } from './router.js';
+import { wazeUrl, googleMapsUrl } from './links.js';
+import { cap, dayNumber, longDate, rangeLabel, time12, weekdayShort, weekdayName } from './dates.js';
+
+const extLink = (href, cls, label) =>
+  h(
+    'a',
+    { href, class: cls, target: '_blank', rel: 'noopener noreferrer' },
+    label,
+    icon('external', 'icon icon-sm'),
+    h('span', { class: 'sr-only' }, ' (se abre en una pestaña nueva)'),
+  );
+
+const page = (title, ...content) => [
+  h(
+    'header',
+    { class: 'page-head' },
+    h('a', { href: routeHref('home'), class: 'back', 'aria-label': 'Volver al inicio' }, icon('back'), h('span', {}, 'Inicio')),
+    h('h1', { id: 'page-title', tabindex: '-1' }, title),
+  ),
+  ...content,
+];
+
+export function homeView(trip) {
+  const cards = [
+    ['vuelos', 'plane', 'Vuelos', 'Horarios y detalles'],
+    ['hotel', 'hotel', 'Hotel', 'Ubicación y Waze'],
+    ['calendario', 'calendar', 'Calendario', 'Actividades por día'],
+    ['checklist', 'checklist', 'Checklist', 'Lista de pendientes'],
+  ];
+  return [
+    h(
+      'header',
+      { class: 'hero' },
+      h('p', { class: 'eyebrow' }, trip.eyebrow),
+      h('h1', { id: 'page-title', tabindex: '-1' }, trip.title),
+      h('p', { class: 'dates' }, rangeLabel(trip.startDate, trip.endDate)),
+    ),
+    h(
+      'section',
+      { 'aria-labelledby': 'week-h' },
+      h('h2', { id: 'week-h', class: 'sr-only' }, 'Resumen de la semana'),
+      h(
+        'ol',
+        { class: 'week' },
+        trip.days.map((d) =>
+          h(
+            'li',
+            { class: 'week-day' },
+            h('span', { class: 'wd' }, weekdayShort(d.date)),
+            h('span', { class: 'wn' }, String(dayNumber(d.date))),
+            h('span', { class: 'wa' }, d.short),
+          ),
+        ),
+      ),
+    ),
+    h(
+      'nav',
+      { 'aria-label': 'Secciones' },
+      h(
+        'ul',
+        { class: 'cards' },
+        cards.map(([r, ic, t, s]) =>
+          h(
+            'li',
+            {},
+            h(
+              'a',
+              { href: routeHref(r), class: 'card' },
+              h('span', { class: 'card-icon' }, icon(ic)),
+              h('span', { class: 'card-text' }, h('span', { class: 'card-title' }, t), h('span', { class: 'card-sub' }, s)),
+              icon('chevron', 'icon card-chev'),
+            ),
+          ),
+        ),
+      ),
+    ),
+  ];
+}
+
+const placeText = (p) => (p ? `${p.name} (${p.code})` : 'Aeropuerto no especificado');
+
+export function flightsView(trip) {
+  const f = trip.flights;
+  return page(
+    'Vuelos',
+    h('p', { class: 'lead' }, f.airline),
+    f.legs.map((l) =>
+      h(
+        'article',
+        { class: 'panel', 'aria-labelledby': `fl-${l.id}` },
+        h('h2', { id: `fl-${l.id}` }, l.label),
+        h('p', { class: 'meta' }, `${l.number} · ${longDate(l.date)}`),
+        h(
+          'dl',
+          { class: 'times' },
+          ...['departure', 'arrival'].flatMap((side) => [
+            h('dt', {}, side === 'departure' ? 'Salida' : 'Llegada'),
+            h(
+              'dd',
+              {},
+              h('span', { class: 'big' }, time12(l[side].time)),
+              h('span', { class: 'sub' }, placeText(l[side].place)),
+              h('span', { class: 'sub' }, l[side].place ? `Hora local (${l[side].place.timezone})` : 'Hora local del aeropuerto'),
+            ),
+          ]),
+        ),
+      ),
+    ),
+    h('p', { class: 'note' }, f.note),
+  );
+}
+
+export function hotelView(trip) {
+  const ht = trip.hotel;
+  return page(
+    'Hotel',
+    h(
+      'article',
+      { class: 'panel' },
+      h('div', { class: 'hotel-head' }, icon('pin'), h('div', {}, h('h2', {}, ht.name), h('p', { class: 'meta' }, ht.locality))),
+      h(
+        'dl',
+        { class: 'facts' },
+        h('dt', {}, 'Dirección'),
+        h('dd', {}, ht.address ?? 'Por confirmar con el hotel'),
+        h('dt', {}, 'Check-in'),
+        h('dd', {}, ht.checkIn ?? 'Por confirmar'),
+        h('dt', {}, 'Checkout'),
+        h('dd', {}, ht.checkOut ?? 'Por confirmar'),
+      ),
+    ),
+    h(
+      'div',
+      { class: 'actions' },
+      extLink(wazeUrl(ht.mapQuery), 'btn btn-primary', 'Ir con Waze'),
+      extLink(googleMapsUrl(ht.mapQuery), 'btn btn-secondary', 'Abrir en Google Maps'),
+    ),
+    h('p', { class: 'note' }, 'Los enlaces buscan el hotel por nombre y ciudad.'),
+  );
+}
+
+export function calendarView(trip, selected) {
+  const sel = trip.days.find((d) => d.date === selected) ?? null;
+  const current = sel ?? trip.days[0];
+  return page(
+    'Calendario',
+    h(
+      'nav',
+      { 'aria-label': 'Días del viaje' },
+      h(
+        'ul',
+        { class: 'daytabs' },
+        trip.days.map((d) =>
+          h(
+            'li',
+            {},
+            h(
+              'a',
+              {
+                href: routeHref('calendario', d.date),
+                class: 'daytab',
+                'aria-current': d.date === current.date ? 'page' : false,
+              },
+              h('span', { class: 'wd', 'aria-hidden': 'true' }, weekdayShort(d.date)),
+              h('span', { class: 'sr-only' }, `${cap(weekdayName(d.date))} `),
+              h('span', { class: 'wn' }, String(dayNumber(d.date))),
+            ),
+          ),
+        ),
+      ),
+    ),
+    h(
+      'article',
+      { class: 'panel', 'aria-labelledby': 'day-h' },
+      h('h2', { id: 'day-h' }, longDate(current.date)),
+      h('p', { class: 'meta' }, current.short),
+      h(
+        'ul',
+        { class: 'agenda' },
+        current.items.map((t) => h('li', {}, t)),
+      ),
+    ),
+    h('p', { class: 'note' }, 'No hay horarios definidos para las actividades; se agregarán cuando estén confirmados.'),
+  );
+}
+
+export function checklistView(trip, checklist, { onToggle, onReset, persistent }) {
+  const total = checklist.progress();
+  const groups = trip.checklist.map((g) => {
+    const p = checklist.progress(g);
+    return h(
+      'section',
+      { class: 'panel', 'aria-labelledby': `cg-${g.id}` },
+      h('h2', { id: `cg-${g.id}` }, g.title, h('span', { class: 'count', id: `cnt-${g.id}` }, ` ${p.done}/${p.total}`)),
+      h(
+        'ul',
+        { class: 'checks' },
+        g.items.map((it) => {
+          const cid = `ck-${it.id}`;
+          return h(
+            'li',
+            {},
+            h('input', { type: 'checkbox', id: cid, checked: checklist.isDone(it.id), onchange: () => onToggle(it.id) }),
+            h('label', { for: cid }, h('span', { class: 'box' }, icon('check')), h('span', { class: 'ck-text' }, it.text)),
+          );
+        }),
+      ),
+    );
+  });
+  const dialog = h(
+    'dialog',
+    { class: 'dialog', 'aria-labelledby': 'dlg-h' },
+    h('h2', { id: 'dlg-h' }, '¿Restablecer el checklist?'),
+    h('p', {}, 'Se desmarcarán todos los elementos de este dispositivo. Esta acción no se puede deshacer.'),
+    h(
+      'div',
+      { class: 'actions' },
+      h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => dialog.close() }, 'Cancelar'),
+      h(
+        'button',
+        {
+          type: 'button',
+          class: 'btn btn-danger',
+          id: 'confirm-reset',
+          onclick: () => {
+            dialog.close();
+            onReset();
+          },
+        },
+        'Sí, restablecer',
+      ),
+    ),
+  );
+  return page(
+    'Checklist',
+    h('p', { class: 'lead', role: 'status', id: 'progress' }, `${total.done} de ${total.total} completados`),
+    persistent
+      ? null
+      : h('p', { class: 'note warn', role: 'alert' }, 'Este navegador no permite guardar datos; el avance se perderá al cerrar la app.'),
+    groups,
+    h('button', { type: 'button', class: 'btn btn-secondary', id: 'reset', onclick: () => dialog.showModal() }, 'Restablecer checklist'),
+    dialog,
+  );
+}
+
+export const errorView = (message) => page('No se pudo cargar', h('p', { class: 'panel', role: 'alert' }, message));
+export const notFoundView = () =>
+  page(
+    'Página no encontrada',
+    h('p', { class: 'panel' }, 'La sección solicitada no existe.'),
+    h('a', { href: routeHref('home'), class: 'btn btn-primary' }, 'Ir al inicio'),
+  );
+export { cap, weekdayName };

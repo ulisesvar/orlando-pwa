@@ -1,0 +1,32 @@
+{
+  "name": "orlando-pwa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PWA familiar del viaje a Orlando 2026",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "serve": "node scripts/serve.mjs",
+    "validate:data": "node scripts/validate-data.mjs",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "test:unit": "vitest run",
+    "test:e2e": "npm run build && playwright test --project=mobile --project=desktop tests/e2e",
+    "test:a11y": "npm run build && playwright test --project=mobile tests/e2e/a11y.spec.mjs",
+    "test:security": "vitest run tests/security && playwright test --project=mobile tests/security",
+    "test:container": "bash scripts/verify-container.sh",
+    "audit": "npm audit --omit=dev --audit-level=high && npm audit --audit-level=high"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.0",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
+    "prettier": "^3.10.1",
+    "vitest": "^5.1.0"
+  }
+}
