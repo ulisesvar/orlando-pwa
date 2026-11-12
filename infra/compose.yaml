@@ -1,0 +1,25 @@
+# Despliegue en Canumpe: /opt/canumpe/apps/viaje  (proyecto "viaje" -> contenedor viaje-web-1)
+# Exportar ORLANDO_IMAGE con la referencia fijada por digest, p. ej.:
+#   ORLANDO_IMAGE=ghcr.io/ulisesvar/orlando-pwa@sha256:<digest>
+services:
+  web:
+    image: ${ORLANDO_IMAGE:?defina ORLANDO_IMAGE como ghcr.io/ulisesvar/orlando-pwa@sha256:<digest>}
+    restart: unless-stopped
+    user: '101:101'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    privileged: false
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m,uid=101,gid=101
+    ports:
+      - '127.0.0.1:3101:8080'
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:8080/healthz']
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: json-file
+      options: { max-size: '10m', max-file: '3' }

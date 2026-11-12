@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "title": "Orlando 2026",
+  "eyebrow": "NUESTRO VIAJE",
+  "startDate": "2026-12-05",
+  "endDate": "2026-12-11",
+  "days": [
+    {
+      "date": "2026-12-05",
+      "short": "Llegada / Walmart",
+      "items": ["Llegada a MCO.", "Recoger automóvil de Alamo.", "Traslado al hotel.", "Compras en Walmart."]
+    },
+    { "date": "2026-12-06", "short": "Universal", "items": ["Universal."] },
+    { "date": "2026-12-07", "short": "Mall", "items": ["Compras en mall."] },
+    { "date": "2026-12-08", "short": "Libre", "items": ["Día libre."] },
+    { "date": "2026-12-09", "short": "Magic Kingdom", "items": ["Magic Kingdom."] },
+    {
+      "date": "2026-12-10",
+      "short": "Very Merry",
+      "items": ["Mickey's Very Merry Christmas Party en Magic Kingdom.", "Entradas ya compradas; actividad confirmada."]
+    },
+    { "date": "2026-12-11", "short": "Regreso", "items": ["Checkout.", "Devolución del automóvil.", "Vuelo de regreso."] }
+  ],
+  "flights": {
+    "airline": "Volaris",
+    "note": "Todos los horarios son locales de sus respectivos aeropuertos.",
+    "legs": [
+      {
+        "id": "ida",
+        "label": "Vuelo de ida",
+        "number": "Y4780",
+        "date": "2026-12-05",
+        "departure": { "time": "11:10", "place": null },
+        "arrival": {
+          "time": "15:18",
+          "place": { "code": "MCO", "name": "Aeropuerto Internacional de Orlando", "timezone": "America/New_York" }
+        }
+      },
+      {
+        "id": "regreso",
+        "label": "Vuelo de regreso",
+        "number": "Y4781",
+        "date": "2026-12-11",
+        "departure": {
+          "time": "17:05",
+          "place": { "code": "MCO", "name": "Aeropuerto Internacional de Orlando", "timezone": "America/New_York" }
+        },
+        "arrival": { "time": "19:45", "place": null }
+      }
+    ]
+  },
+  "hotel": {
+    "name": "Vacation Village at Parkway",
+    "locality": "Kissimmee, Florida",
+    "address": null,
+    "mapQuery": "Vacation Village at Parkway, Kissimmee, FL",
+    "checkIn": null,
+    "checkOut": null
+  },
+  "checklist": [
+    {
+      "id": "documentos",
+      "title": "Documentos",
+      "items": [
+        { "id": "doc-pasaportes", "text": "Pasaportes vigentes para todos los viajeros" },
+        { "id": "doc-entrada", "text": "Documentos de entrada a Estados Unidos en regla" },
+        { "id": "doc-licencia", "text": "Licencia de conducir vigente para la renta del automóvil" },
+        { "id": "doc-pases", "text": "Pases de abordar o check-in en línea de Volaris" },
+        { "id": "doc-entradas", "text": "Entradas de parques y de la fiesta navideña guardadas sin conexión" }
+      ]
+    },
+    {
+      "id": "equipaje",
+      "title": "Equipaje",
+      "items": [
+        { "id": "eq-politica", "text": "Revisar la política de equipaje de Volaris" },
+        { "id": "eq-ropa", "text": "Ropa cómoda y una capa ligera para la noche" },
+        { "id": "eq-calzado", "text": "Calzado cómodo para caminar" },
+        { "id": "eq-lluvia", "text": "Impermeable o poncho ligero" },
+        { "id": "eq-sol", "text": "Protector solar, gorra y lentes" }
+      ]
+    },
+    {
+      "id": "dispositivos",
+      "title": "Dispositivos",
+      "items": [
+        { "id": "dev-cargadores", "text": "Cargadores y cables" },
+        { "id": "dev-bateria", "text": "Batería externa cargada" },
+        { "id": "dev-mapas", "text": "Mapas descargados para uso sin conexión" },
+        { "id": "dev-datos", "text": "Plan de datos o roaming revisado" }
+      ]
+    },
+    {
+      "id": "salud",
+      "title": "Salud",
+      "items": [
+        { "id": "sal-meds", "text": "Medicamentos personales en su empaque original" },
+        { "id": "sal-botiquin", "text": "Botiquín básico" },
+        { "id": "sal-seguro", "text": "Seguro de viaje revisado" }
+      ]
+    },
+    {
+      "id": "preparativos",
+      "title": "Preparativos",
+      "items": [
+        { "id": "pre-auto", "text": "Confirmar la renta del automóvil con Alamo" },
+        { "id": "pre-banco", "text": "Avisar al banco del viaje" },
+        { "id": "pre-efectivo", "text": "Efectivo en dólares para imprevistos" },
+        { "id": "pre-casa", "text": "Dejar la casa lista antes de salir" }
+      ]
+    }
+  ]
+}
