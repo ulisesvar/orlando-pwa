@@ -12,7 +12,7 @@ self.addEventListener('install', (event) => {
       const cache = await caches.open(CACHE);
       const urls = JSON.parse(PRECACHE).map((p) => new URL(p, SCOPE).href);
       await cache.addAll(urls.map((u) => new Request(u, { cache: 'reload' })));
-      await self.skipWaiting();
+      // Sin skipWaiting aquí: la versión nueva queda en espera hasta que la persona confirme (mensaje SKIP_WAITING).
     })(),
   );
 });
@@ -24,6 +24,11 @@ self.addEventListener('activate', (event) => {
       await self.clients.claim();
     })(),
   );
+});
+
+// La página pide la activación solo tras «Actualizar ahora». Se ignora cualquier otro mensaje.
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('fetch', (event) => {
