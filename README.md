@@ -45,3 +45,7 @@ Edite solo `src/data/trip.json`, ejecute `npm run validate:data` y abra un PR. A
 ## Documentación
 
 [Arquitectura](docs/ARCHITECTURE.md) · [Seguridad y matriz ASVS](docs/SECURITY.md) · [Plan de pruebas](docs/TEST-PLAN.md) · [Despliegue](docs/DEPLOYMENT.md) · [Rollback](docs/ROLLBACK.md)
+
+## Créditos
+
+La fotografía de portada (`src/img/orlando-castillo-*.webp`) es un recorte 16:9, redimensionado y convertido a WebP, de «Magic Kingdom – Cinderella Castle panorama» de Michael Gray (Flickr: kathika), publicada en [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Magic_Kingdom_-_Cinderella_Castle_panorama_-_by_mrkathika.jpg) bajo licencia [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/). Las versiones derivadas se distribuyen bajo la misma licencia. Disney, Magic Kingdom y Cinderella Castle son marcas de sus titulares; este proyecto es familiar y no tiene afiliación con ellos.

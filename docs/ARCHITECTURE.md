@@ -52,3 +52,4 @@ Datos: `src/data/trip.json` (única fuente). Estilos: `src/css/app.css` (tokens,
 5. Siga [DEPLOYMENT.md](DEPLOYMENT.md).
 
 - **Recorrido dentro de Calendario (v1.1.0)**: `src/data/itineraries.json` + `src/js/itinerary.js`, con estado propio en `orlando2026:itinerary:v1`. Ver [ITINERARIOS.md](ITINERARIOS.md).
+- **Portada (v1.1.x)**: fotografía decorativa local en `src/img/` (WebP 640/960/1280 px, 16:9, `srcset`, `alt=""`, no enlazada). Se precachea con el resto de `dist/`, por lo que funciona sin conexión. Reemplaza la tira de resumen semanal del inicio; esa información sigue en Calendario. Créditos y licencia en el README.

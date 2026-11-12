@@ -23,7 +23,7 @@ test.describe('datos manipulados (XSS)', () => {
       t.days[0].short = '<img src=x>';
     });
     await page.goto('/');
-    await expect(page.locator('.week-day').first()).toContainText('<img src=x');
+    await expect(page.locator('a.card')).toHaveCount(4);
     await page.goto('/#/calendario');
     await expect(page.locator('.agenda li').first()).toHaveText(payload);
     expect(await page.evaluate(() => window.__xss)).toBeUndefined();

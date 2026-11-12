@@ -30,7 +30,13 @@ describe('código del frontend (ASVS V1.3.2, V3.2.2)', () => {
       const urls = read(f).match(/https?:\/\/[^\s'"`)]+/g) ?? [];
       for (const u of urls)
         expect(
-          ['https://waze.com/ul', 'https://www.google.com/maps/search/', 'http://www.w3.org/2000/svg'].some((ok) => u.startsWith(ok)),
+          [
+            'https://waze.com/ul',
+            'https://www.google.com/maps/search/',
+            'http://www.w3.org/2000/svg',
+            // Enlace de atribución (navegación), no un recurso cargado: crédito de la foto de portada.
+            'https://commons.wikimedia.org/wiki/File:Magic_Kingdom_-_Cinderella_Castle_panorama_-_by_mrkathika.jpg',
+          ].some((ok) => u.startsWith(ok)),
           `${f}: ${u}`,
         ).toBe(true);
     }
