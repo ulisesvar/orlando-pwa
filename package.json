@@ -1,6 +1,6 @@
 {
   "name": "orlando-pwa",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "description": "PWA familiar del viaje a Orlando 2026",
   "type": "module",
