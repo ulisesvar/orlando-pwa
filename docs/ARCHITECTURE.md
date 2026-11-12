@@ -51,4 +51,4 @@ Datos: `src/data/trip.json` (única fuente). Estilos: `src/css/app.css` (tokens,
 4. Actions → **Release** → *Run workflow* con la versión (p. ej. `1.0.1`). El resumen del job entrega la referencia por digest.
 5. Siga [DEPLOYMENT.md](DEPLOYMENT.md).
 
-- **Itinerarios (v1.1.0)**: `src/data/itineraries.json` + `src/js/itinerary.js`, con estado propio en `orlando2026:itinerary:v1`. Ver [ITINERARIOS.md](ITINERARIOS.md).
+- **Recorrido / itinerarios (v1.1.0)**: `src/data/itineraries.json` + `src/js/itinerary.js`, con estado propio en `orlando2026:itinerary:v1`. Ver [ITINERARIOS.md](ITINERARIOS.md).

@@ -1,10 +1,9 @@
-// Itinerarios de Magic Kingdom: validación de datos y seguimiento de estado por día.
+// Recorrido de Magic Kingdom (itinerarios): validación de datos y seguimiento de estado por día.
 import { isRealDate, ValidationError } from './validate.js';
 
 export const STORAGE_KEY = 'orlando2026:itinerary:v1';
 export const CATEGORIES = ['traslado', 'atraccion', 'personaje', 'comida', 'descanso', 'espectaculo'];
 export const PRIORITIES = ['imprescindible', 'recomendada', 'opcional'];
-export const STATUSES = ['pending', 'done', 'skipped'];
 
 const ID = /^[a-z0-9][a-z0-9-]{0,39}$/;
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -84,7 +83,8 @@ export function validateItineraries(data) {
   return data;
 }
 
-// Estado: { v: 1, days: { [fecha]: { [idActividad]: 'done' | 'skipped' } } }. "pending" es la ausencia de entrada.
+// Estado: { v: 1, days: { [fecha]: { [idActividad]: 'done' } } }. Pendiente es la ausencia de entrada.
+// Compatibilidad: valores 'skipped' guardados por la versión anterior se tratan como pendientes y se descartan al guardar.
 export function parseState(raw, days) {
   const out = {};
   for (const d of days) out[d.date] = {};
@@ -96,7 +96,7 @@ export function parseState(raw, days) {
       const saved = obj.days[d.date];
       if (!saved || typeof saved !== 'object') continue;
       const valid = new Set(d.activities.map((a) => a.id));
-      for (const [id, st] of Object.entries(saved)) if (valid.has(id) && (st === 'done' || st === 'skipped')) out[d.date][id] = st;
+      for (const [id, st] of Object.entries(saved)) if (valid.has(id) && st === 'done') out[d.date][id] = 'done';
     }
   } catch {
     /* estado corrupto: se ignora */
@@ -105,32 +105,28 @@ export function parseState(raw, days) {
 }
 
 export function createItineraryTracker(days, store) {
-  let state = parseState(store.get(STORAGE_KEY), days);
+  const state = parseState(store.get(STORAGE_KEY), days);
   const byDate = new Map(days.map((d) => [d.date, d]));
   const save = () => store.set(STORAGE_KEY, JSON.stringify({ v: 1, days: state }));
+  const isDone = (date, id) => state[date]?.[id] === 'done';
   return {
-    status: (date, id) => state[date]?.[id] ?? 'pending',
-    set(date, id, status) {
+    isDone,
+    set(date, id, done) {
       const day = byDate.get(date);
-      if (!day || !STATUSES.includes(status) || !day.activities.some((a) => a.id === id)) return false;
-      if (status === 'pending') delete state[date][id];
-      else state[date][id] = status;
+      if (!day || typeof done !== 'boolean' || !day.activities.some((a) => a.id === id)) return false;
+      if (done) state[date][id] = 'done';
+      else delete state[date][id];
       save();
       return true;
     },
     progress(date) {
-      const day = byDate.get(date);
-      const vals = day.activities.map((a) => state[date][a.id] ?? 'pending');
-      return {
-        total: vals.length,
-        done: vals.filter((s) => s === 'done').length,
-        skipped: vals.filter((s) => s === 'skipped').length,
-        pending: vals.filter((s) => s === 'pending').length,
-      };
+      const total = byDate.get(date).activities.length;
+      const done = byDate.get(date).activities.filter((a) => isDone(date, a.id)).length;
+      return { total, done, pending: total - done };
     },
     // Primera actividad pendiente en orden cronológico.
     next(date) {
-      return byDate.get(date).activities.find((a) => (state[date][a.id] ?? 'pending') === 'pending') ?? null;
+      return byDate.get(date).activities.find((a) => !isDone(date, a.id)) ?? null;
     },
   };
 }

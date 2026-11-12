@@ -162,9 +162,9 @@ test.describe('acceso familiar sin conexión', () => {
       // Itinerarios disponibles y con estado persistente sin conexión.
       await page.goto('/#/itinerarios/2026-12-10');
       await expect(page.getByRole('heading', { level: 1 })).toHaveText("Mickey's Very Merry Christmas Party");
-      await page.getByRole('group', { name: 'Estado de Fuegos artificiales navideños' }).getByLabel('Completada').check();
+      await page.getByRole('checkbox', { name: /Fuegos artificiales navideños/ }).check();
       await page.reload();
-      await expect(page.getByRole('group', { name: 'Estado de Fuegos artificiales navideños' }).getByLabel('Completada')).toBeChecked();
+      await expect(page.getByRole('checkbox', { name: /Fuegos artificiales navideños/ })).toBeChecked();
       await page.goto('/#/itinerarios/2026-12-09');
       await expect(page.locator('.it-item')).toHaveCount(17);
     } finally {

@@ -27,7 +27,7 @@ export function homeView(trip) {
     ['vuelos', 'plane', 'Vuelos', 'Horarios y detalles'],
     ['hotel', 'hotel', 'Hotel', 'Ubicación y Waze'],
     ['calendario', 'calendar', 'Calendario', 'Actividades por día'],
-    ['itinerarios', 'navigate', 'Itinerarios', 'Magic Kingdom: 9 y 10 de diciembre'],
+    ['itinerarios', 'navigate', 'Recorrido', 'Magic Kingdom: 9 y 10 de diciembre'],
     ['checklist', 'checklist', 'Checklist', 'Lista de pendientes'],
   ];
   return [
@@ -313,14 +313,17 @@ const CATEGORY_LABEL = {
   descanso: 'Descanso',
   espectaculo: 'Espectáculo',
 };
-const STATUS_LABEL = { pending: 'Pendiente', done: 'Completada', skipped: 'Omitida' };
 
-const progressText = (p) => `Completadas: ${p.done} · Omitidas: ${p.skipped} · Pendientes: ${p.pending} de ${p.total}`;
+const progressText = (p) => `Realizadas: ${p.done} de ${p.total}`;
 
 export function itinerariesIndexView(days, tracker) {
   return page(
-    'Itinerarios',
-    h('p', { class: 'lead' }, 'Elige el día. El avance se guarda en este dispositivo y funciona sin conexión.'),
+    'Recorrido',
+    h(
+      'p',
+      { class: 'lead' },
+      'Elige el día. Marca cada actividad al terminarla; el avance se guarda en este dispositivo y funciona sin conexión.',
+    ),
     h(
       'ul',
       { class: 'cards' },
@@ -355,55 +358,49 @@ export function itineraryDayView(days, date, tracker) {
     const next = tracker.next(date);
     summary.replaceChildren(
       h('p', { class: 'it-progress', role: 'status', id: 'it-progress' }, progressText(p)),
-      h('progress', { class: 'it-bar', max: p.total, value: p.done + p.skipped, 'aria-label': 'Actividades resueltas' }),
+      h('progress', { class: 'it-bar', max: p.total, value: p.done, 'aria-label': 'Actividades realizadas' }),
       next
         ? h('p', { class: 'it-next' }, h('strong', {}, 'Siguiente: '), `${next.label} · ${next.name}`)
-        : h('p', { class: 'it-next' }, h('strong', {}, 'Día completo: '), 'no quedan actividades pendientes.'),
+        : h('p', { class: 'it-next' }, h('strong', {}, '¡Recorrido completo! '), 'No quedan actividades pendientes.'),
     );
     for (const a of day.activities) {
-      const li = items.get(a.id);
-      const st = tracker.status(date, a.id);
-      li.className = `it-item st-${st}${next && next.id === a.id ? ' is-next' : ''}`;
+      const { li, flag } = items.get(a.id);
+      const isNext = !!next && next.id === a.id;
+      li.className = `it-item${tracker.isDone(date, a.id) ? ' st-done' : ''}${isNext ? ' is-next' : ''}`;
+      flag.hidden = !isNext;
     }
   };
 
   const activity = (a) => {
-    const st = tracker.status(date, a.id);
-    const group = h(
-      'fieldset',
-      { class: 'it-status' },
-      h('legend', { class: 'sr-only' }, `Estado de ${a.name}`),
-      ['pending', 'done', 'skipped'].map((value) => {
-        const rid = `st-${a.id}-${value}`;
-        return h(
-          'span',
-          { class: 'it-opt' },
-          h('input', {
-            type: 'radio',
-            name: `st-${a.id}`,
-            id: rid,
-            value,
-            checked: st === value,
-            onchange: () => {
-              tracker.set(date, a.id, value);
-              refresh();
-            },
-          }),
-          h('label', { for: rid }, STATUS_LABEL[value]),
-        );
-      }),
-    );
+    const cid = `it-${a.id}`;
+    const flag = h('span', { class: 'tag tag-next', hidden: true }, 'Siguiente');
     const li = h(
       'li',
       { class: 'it-item' },
-      h('p', { class: 'it-time' }, a.label),
+      h('input', {
+        type: 'checkbox',
+        id: cid,
+        class: 'it-check',
+        checked: tracker.isDone(date, a.id),
+        onchange: (e) => {
+          tracker.set(date, a.id, e.target.checked);
+          refresh();
+        },
+      }),
+      h(
+        'label',
+        { for: cid, class: 'it-row' },
+        h('span', { class: 'it-box' }, icon('check')),
+        h('span', { class: 'it-time' }, a.label),
+        h('span', { class: 'it-name' }, a.name),
+      ),
       h(
         'div',
         { class: 'it-body' },
-        h('h3', { class: 'it-name' }, a.name),
         h(
           'p',
           { class: 'it-tags' },
+          flag,
           h('span', { class: `tag prio-${a.priority}` }, a.priority.charAt(0).toUpperCase() + a.priority.slice(1)),
           h('span', { class: 'tag' }, CATEGORY_LABEL[a.category]),
           a.provisional ? h('span', { class: 'tag tag-prov' }, 'Horario provisional') : null,
@@ -412,10 +409,9 @@ export function itineraryDayView(days, date, tracker) {
         h('p', { class: 'meta' }, `Zona: ${a.zone}`),
         a.notes ? h('p', { class: 'it-note' }, h('strong', {}, 'Observación: '), a.notes) : null,
         a.alternative ? h('p', { class: 'it-note' }, h('strong', {}, 'Alternativa: '), a.alternative) : null,
-        group,
       ),
     );
-    items.set(a.id, li);
+    items.set(a.id, { li, flag });
     return li;
   };
 
@@ -425,7 +421,7 @@ export function itineraryDayView(days, date, tracker) {
     day.title,
     h(
       'nav',
-      { 'aria-label': 'Itinerarios' },
+      { 'aria-label': 'Días del recorrido' },
       h(
         'ul',
         { class: 'it-tabs' },

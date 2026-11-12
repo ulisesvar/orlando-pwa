@@ -24,7 +24,7 @@ test.describe('pantalla principal', () => {
       /Vuelos\s*Horarios y detalles/,
       /Hotel\s*Ubicación y Waze/,
       /Calendario\s*Actividades por día/,
-      /Itinerarios\s*Magic Kingdom: 9 y 10 de diciembre/,
+      /Recorrido\s*Magic Kingdom: 9 y 10 de diciembre/,
       /Checklist\s*Lista de pendientes/,
     ]);
   });

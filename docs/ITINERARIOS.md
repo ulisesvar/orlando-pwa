@@ -1,12 +1,13 @@
-# Itinerarios de Magic Kingdom (v1.1.0)
+# Recorrido de Magic Kingdom (v1.1.0)
 
-Dos itinerarios independientes: **miércoles 9 de diciembre de 2026** (Magic Kingdom) y **jueves 10 de diciembre de 2026** (Mickey's Very Merry Christmas Party). Rutas: `#/itinerarios`, `#/itinerarios/2026-12-09`, `#/itinerarios/2026-12-10`.
+Dos itinerarios independientes: **miércoles 9 de diciembre de 2026** (Magic Kingdom) y **jueves 10 de diciembre de 2026** (Mickey's Very Merry Christmas Party). Nombre visible: **«Recorrido»**; las rutas internas conservan `itinerarios` para no romper enlaces ni la caché. Rutas: `#/itinerarios`, `#/itinerarios/2026-12-09`, `#/itinerarios/2026-12-10`.
 
 ## Diseño
 
 - Datos: `src/data/itineraries.json` (archivo propio; `trip.json`, vuelos, hotel y acceso no se tocan). Validación estricta en `src/js/itinerary.js` (claves desconocidas, categorías, prioridades, orden cronológico, ids únicos, URLs `https`).
 - Cada actividad tiene hora (`start`) y etiqueta mostrada (`label`, p. ej. `~19:00` o `20:00–21:00`), nombre, descripción, zona, categoría (traslado, atracción, personaje, comida, descanso, espectáculo), prioridad (imprescindible, recomendada, opcional), bandera `provisional`, observaciones y alternativa. Las actividades sin hora («Última hora», «Al terminar») van al final.
-- Estado: pendiente / completada / omitida, por actividad y por día, en `localStorage` bajo `orlando2026:itinerary:v1` (`{ v: 1, days: { fecha: { idActividad: 'done' | 'skipped' } } }`). «Pendiente» es la ausencia de entrada. Es una clave distinta de la del checklist (`orlando2026:checklist:v1`), que no se lee ni se modifica. Estado corrupto o con ids ajenos se ignora.
+- Estado: **una casilla por actividad** (marcada = realizada, desmarcada = pendiente), por día, en `localStorage` bajo `orlando2026:itinerary:v1` (`{ v: 1, days: { fecha: { idActividad: 'done' } } }`). Pendiente es la ausencia de entrada.
+- Migración: el formato `v: 1` no cambia. Los valores `skipped` guardados por la versión anterior del PR se leen como pendientes y se descartan en el siguiente guardado; las `done` se conservan. La clave es distinta de la del checklist (`orlando2026:checklist:v1`), que no se lee ni se modifica. Estado corrupto o con ids ajenos se ignora.
 - «Siguiente» es la primera actividad pendiente en orden cronológico (no depende del reloj del teléfono).
 - Offline: `scripts/build.mjs` precachea todo `dist/`, por lo que `itineraries.json` y `itinerary.js` entran en el Service Worker y su hash de caché cambia. Los enlaces a fuentes oficiales son solo informativos y no se necesitan para mostrar el itinerario.
 - Si `itineraries.json` es inválido o no carga, solo esa sección muestra un error; el resto de la app sigue funcionando.
@@ -39,9 +40,9 @@ Supuestos: las horas de la tabla original se conservan como orden orientativo; l
 
 ## Validación manual (móvil)
 
-1. Abrir la app, entrar con un correo autorizado y tocar «Itinerarios». Deben aparecer los dos días con su fecha.
+1. Abrir la app, entrar con un correo autorizado y tocar «Recorrido». Deben aparecer los dos días con su fecha.
 2. Entrar al 9 de diciembre: lista de 17 actividades desde 07:45 hasta «Última hora», con prioridad y categoría visibles y el aviso de horarios orientativos.
-3. Marcar la primera como «Completada» y la segunda como «Omitida». Debe cambiar el contador y «Siguiente».
+3. Marcar las dos primeras actividades con su casilla (también funciona tocar la tarjeta). Debe cambiar «Realizadas: X de N», la barra y «Siguiente». Desmarcar una la devuelve a pendiente.
 4. Cerrar y reabrir la app: el estado se conserva.
 5. Cambiar al 10 de diciembre: todo sigue pendiente (independiente). Los desfiles, fuegos y encuentros llevan «Horario provisional».
 6. Activar modo avión y reabrir: los itinerarios y su estado siguen disponibles.
@@ -50,7 +51,7 @@ Supuestos: las horas de la tabla original se conservan como orden orientativo; l
 
 ## Evidencia visual
 
-Capturas con emulación Pixel 7 (Chromium) con la primera actividad completada y la segunda omitida:
+Capturas con emulación Pixel 7 (Chromium) con las dos primeras actividades marcadas:
 
 - `docs/itinerario-movil-2026-12-09.png`
 - `docs/itinerario-movil-2026-12-10.png`

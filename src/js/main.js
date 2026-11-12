@@ -85,10 +85,10 @@ function render(route) {
     case 'calendario':
       return mount(v.calendarView(trip, route.date), 'Calendario');
     case 'itinerarios':
-      if (!itineraries) return mount(v.errorView('Los itinerarios no son válidos o no están disponibles.'), 'Error');
-      if (!route.date) return mount(v.itinerariesIndexView(itineraries.days, tracker), 'Itinerarios');
+      if (!itineraries) return mount(v.errorView('El recorrido no es válido o no están disponibles.'), 'Error');
+      if (!route.date) return mount(v.itinerariesIndexView(itineraries.days, tracker), 'Recorrido');
       if (!itineraries.days.some((d) => d.date === route.date)) return mount(v.notFoundView(), 'No encontrada');
-      return mount(v.itineraryDayView(itineraries.days, route.date, tracker), 'Itinerario');
+      return mount(v.itineraryDayView(itineraries.days, route.date, tracker), 'Recorrido');
     case 'checklist':
       return renderChecklist();
     default:
@@ -138,7 +138,7 @@ try {
   console.error(e instanceof Error ? e.message : e);
   trip = null;
 }
-// Los itinerarios fallan de forma independiente: el resto de la app sigue disponible.
+// El recorrido falla de forma independiente: el resto de la app sigue disponible.
 try {
   itineraries = await loadItineraries();
   tracker = createItineraryTracker(itineraries.days, storage);

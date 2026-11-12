@@ -65,40 +65,62 @@ describe('datos de itinerarios', () => {
   });
 });
 
-describe('seguimiento de actividades', () => {
+describe('seguimiento de actividades (casilla única)', () => {
   let store, t;
   beforeEach(() => {
     store = memStore();
     t = createItineraryTracker(data.days, store);
   });
   it('todo empieza pendiente y la siguiente es la primera', () => {
-    expect(t.progress('2026-12-09')).toEqual({ total: 17, done: 0, skipped: 0, pending: 17 });
+    expect(t.progress('2026-12-09')).toEqual({ total: 17, done: 0, pending: 17 });
     expect(t.next('2026-12-09').id).toBe('ttc');
   });
-  it('marca completada/omitida y avanza la siguiente actividad', () => {
-    t.set('2026-12-09', 'ttc', 'done');
-    t.set('2026-12-09', 'ferry', 'skipped');
+  it('marcar y desmarcar actualiza progreso y siguiente', () => {
+    t.set('2026-12-09', 'ttc', true);
+    t.set('2026-12-09', 'ferry', true);
     expect(t.next('2026-12-09').id).toBe('entrada');
-    expect(t.progress('2026-12-09')).toMatchObject({ done: 1, skipped: 1, pending: 15 });
-    t.set('2026-12-09', 'ferry', 'pending');
+    expect(t.progress('2026-12-09')).toMatchObject({ done: 2, pending: 15 });
+    t.set('2026-12-09', 'ferry', false);
+    expect(t.isDone('2026-12-09', 'ferry')).toBe(false);
     expect(t.next('2026-12-09').id).toBe('ferry');
   });
   it('los dos días son independientes aunque compartan identificadores', () => {
-    t.set('2026-12-09', 'ttc', 'done');
-    expect(t.status('2026-12-10', 'ttc')).toBe('pending');
+    t.set('2026-12-09', 'ttc', true);
+    expect(t.isDone('2026-12-10', 'ttc')).toBe(false);
     expect(t.progress('2026-12-10').done).toBe(0);
   });
   it('persiste y se restaura desde el almacenamiento', () => {
-    t.set('2026-12-10', 'fuegos', 'done');
+    t.set('2026-12-10', 'fuegos', true);
     const t2 = createItineraryTracker(data.days, store);
-    expect(t2.status('2026-12-10', 'fuegos')).toBe('done');
-    expect(t2.status('2026-12-09', 'fuegos')).toBe('pending');
+    expect(t2.isDone('2026-12-10', 'fuegos')).toBe(true);
+    expect(t2.isDone('2026-12-09', 'fuegos')).toBe(false);
   });
-  it('rechaza ids, fechas y estados desconocidos', () => {
-    expect(t.set('2026-12-09', 'nope', 'done')).toBe(false);
-    expect(t.set('2026-01-01', 'ttc', 'done')).toBe(false);
-    expect(t.set('2026-12-09', 'ttc', 'hecho')).toBe(false);
+  it('desmarcar elimina la entrada guardada', () => {
+    t.set('2026-12-09', 'ttc', true);
+    t.set('2026-12-09', 'ttc', false);
+    expect(JSON.parse(store.get(STORAGE_KEY)).days['2026-12-09']).toEqual({});
+  });
+  it('rechaza ids, fechas y valores no booleanos', () => {
+    expect(t.set('2026-12-09', 'nope', true)).toBe(false);
+    expect(t.set('2026-01-01', 'ttc', true)).toBe(false);
+    expect(t.set('2026-12-09', 'ttc', 'done')).toBe(false);
     expect(store.m.size).toBe(0);
+  });
+  it('migración: los estados "skipped" guardados pasan a pendientes y se conservan las completadas', () => {
+    store.set(
+      STORAGE_KEY,
+      JSON.stringify({
+        v: 1,
+        days: { '2026-12-09': { ttc: 'done', ferry: 'skipped', entrada: 'skipped' }, '2026-12-10': { fuegos: 'done' } },
+      }),
+    );
+    const t2 = createItineraryTracker(data.days, store);
+    expect(t2.isDone('2026-12-09', 'ttc')).toBe(true);
+    expect(t2.isDone('2026-12-09', 'ferry')).toBe(false);
+    expect(t2.isDone('2026-12-10', 'fuegos')).toBe(true);
+    expect(t2.next('2026-12-09').id).toBe('ferry');
+    t2.set('2026-12-09', 'mine-train', true); // al guardar se descartan los skipped
+    expect(JSON.parse(store.get(STORAGE_KEY)).days['2026-12-09']).toEqual({ ttc: 'done', 'mine-train': 'done' });
   });
   it('tolera estado corrupto o con ids ajenos', () => {
     for (const bad of ['{corrupto', '[]', '{"v":2}', 'null', '{"v":1,"days":5}'])
@@ -108,7 +130,7 @@ describe('seguimiento de actividades', () => {
   });
   it('usa una clave propia y no toca la del checklist', () => {
     store.set(CHECKLIST_KEY, '{"v":1,"done":["doc-pasaportes"]}');
-    t.set('2026-12-09', 'ttc', 'done');
+    t.set('2026-12-09', 'ttc', true);
     expect(store.get(CHECKLIST_KEY)).toBe('{"v":1,"done":["doc-pasaportes"]}');
     expect(STORAGE_KEY).not.toBe(CHECKLIST_KEY);
     expect(store.m.has(STORAGE_KEY)).toBe(true);
