@@ -81,7 +81,7 @@ La imagen base (`nginx-unprivileged:1.30-alpine`, `node:22-alpine` solo para el 
 
 3. **Contenido públicamente legible** hasta configurar y verificar Cloudflare Access. No se simula protección ocultando rutas o JSON. Los datos publicados no incluyen PII ni reservas, pero sí fechas, vuelos y hotel de la familia.
 4. **TLS/HSTS dependen de Cloudflare**; no se pudieron verificar desde este repositorio.
-5. **Datos del hotel sin confirmar** (dirección y horarios de check-in/out en `null`); las fuentes públicas se contradicen.
+5. **Acceso familiar es un filtro de conveniencia, no autenticación**: `access.json` es público y cualquiera que lo lea puede escribir uno de los cuatro correos. No debe protegerse con él información sensible. Los horarios de check-in/out del hotel siguen sin mostrarse.
 6. **`npm audit`** reporta 4 avisos *moderados* en la cadena de desarrollo (`eslint` → `minimatch`). No llegan a la imagen (sin dependencias de producción) y no superan el umbral (alto) del CI.
 7. **Dependencias de CI de terceros** (acciones de GitHub): fijadas por SHA, pero hay que actualizarlas manualmente.
 8. **Sin firma de imagen** (cosign); se emite atestación de procedencia de GitHub (`actions/attest-build-provenance`) y SBOM, que debe verificarse en la primera release.

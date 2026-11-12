@@ -22,7 +22,8 @@ Datos: `src/data/trip.json` (única fuente). Estilos: `src/css/app.css` (tokens,
 
 - **Ruteo por hash**: el servidor solo sirve archivos estáticos; no hay reescrituras ni 404 especiales, y el Service Worker solo necesita precachear `./`.
 - **Sin framework**: ~10 módulos pequeños; el costo de un framework no se justifica.
-- **Datos no confirmados se omiten**: aeropuerto/zona horaria de origen del viaje, dirección exacta y horarios de check-in/out del hotel están en `null` y la UI dice «Por confirmar». Las fuentes consultadas se contradicen (p. ej. 2975 Arabian Nights Blvd vs. 3001 Parkway Blvd), así que los mapas buscan por nombre y ciudad.
+- **Datos no confirmados se omiten**: los horarios de check-in/out del hotel están en `null` y no se muestran. La dirección confirmada (2975 Arabian Nights Blvd, Kissimmee, FL 34747) alimenta los enlaces de Waze y Google Maps.
+- **Acceso familiar (v1.0.1)**: `src/js/auth.js` + `src/data/access.json`. El correo se pide una vez por dispositivo, se compara normalizado (minúsculas, sin espacios exteriores) y se recuerda en `localStorage` (`orlando-family-email-v1`). Si el almacenamiento está bloqueado, el acceso vive solo en memoria. «Cambiar usuario» borra únicamente esa clave, no el checklist. Todo se precachea, por lo que funciona sin conexión.
 - **Checklist por dispositivo**: sin cuentas ni sincronización.
 
 ## Service Worker y versiones coherentes

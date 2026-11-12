@@ -8,57 +8,37 @@
     {
       "date": "2026-12-05",
       "short": "Llegada / Walmart",
-      "items": [
-        "Llegada a MCO.",
-        "Recoger automóvil de Alamo.",
-        "Traslado al hotel.",
-        "Compras en Walmart."
-      ]
+      "items": ["Llegada a MCO.", "Recoger automóvil de Alamo.", "Traslado al hotel.", "Compras en Walmart."]
     },
     {
       "date": "2026-12-06",
       "short": "Universal",
-      "items": [
-        "Universal."
-      ]
+      "items": ["Universal."]
     },
     {
       "date": "2026-12-07",
       "short": "Mall",
-      "items": [
-        "Compras en mall."
-      ]
+      "items": ["Compras en mall."]
     },
     {
       "date": "2026-12-08",
       "short": "Libre",
-      "items": [
-        "Día libre."
-      ]
+      "items": ["Día libre."]
     },
     {
       "date": "2026-12-09",
       "short": "Magic Kingdom",
-      "items": [
-        "Magic Kingdom."
-      ]
+      "items": ["Magic Kingdom."]
     },
     {
       "date": "2026-12-10",
       "short": "Very Merry",
-      "items": [
-        "Mickey's Very Merry Christmas Party en Magic Kingdom.",
-        "Entradas ya compradas; actividad confirmada."
-      ]
+      "items": ["Mickey's Very Merry Christmas Party en Magic Kingdom.", "Entradas ya compradas; actividad confirmada."]
     },
     {
       "date": "2026-12-11",
       "short": "Regreso",
-      "items": [
-        "Checkout.",
-        "Devolución del automóvil.",
-        "Vuelo de regreso."
-      ]
+      "items": ["Checkout.", "Devolución del automóvil.", "Vuelo de regreso."]
     }
   ],
   "flights": {

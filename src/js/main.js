@@ -9,16 +9,17 @@ const root = document.getElementById('app');
 let trip = null;
 let checklist = null;
 let allowedEmails = [];
+let persistentAccess = true;
 let currentRoute = { name: 'home' };
 
 async function loadAccess() {
   const res = await fetch('./data/access.json', { cache: 'no-cache' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
-  if (!Array.isArray(data.allowedEmails) || data.allowedEmails.length !== 4 || !data.allowedEmails.every((x) => typeof x === 'string')) throw new Error('Configuración de acceso inválida');
+  if (!Array.isArray(data.allowedEmails) || data.allowedEmails.length !== 4 || !data.allowedEmails.every((x) => typeof x === 'string'))
+    throw new Error('Configuración de acceso inválida');
   return data.allowedEmails.map(normalizeEmail);
 }
-
 
 async function loadTrip() {
   const res = await fetch('./data/trip.json', { cache: 'no-cache' });
@@ -40,15 +41,34 @@ function mount(nodes, title) {
 function render(route) {
   currentRoute = route;
   if (!allowedEmails.length) return mount(v.errorView('No se pudo cargar la configuración de acceso.'), 'Error');
-  if (!isAuthorized(allowedEmails)) return mount(v.accessView({ onSubmit: (email, feedback) => {
-    if (!allowedEmails.includes(normalizeEmail(email))) { feedback.textContent = 'Este correo no está autorizado.'; return; }
-    if (!saveAuthorization(email)) { feedback.textContent = 'No se pudo recordar el acceso en este dispositivo. Revisa el almacenamiento del navegador.'; return; }
-    render(currentRoute);
-  }}), 'Acceso');
+  if (!isAuthorized(allowedEmails))
+    return mount(
+      v.accessView({
+        onSubmit: (email, feedback) => {
+          if (!allowedEmails.includes(normalizeEmail(email))) {
+            feedback.textContent = 'Este correo no está autorizado.';
+            return;
+          }
+          persistentAccess = saveAuthorization(email);
+          render(currentRoute);
+        },
+      }),
+      'Acceso',
+    );
   if (!trip) return mount(v.errorView('Los datos del viaje no son válidos o no están disponibles.'), 'Error');
   switch (route.name) {
     case 'home':
-      return mount([...v.homeView(trip), v.signOutView(() => { clearAuthorization(); render(currentRoute); })], '');
+      return mount(
+        [
+          ...v.homeView(trip),
+          ...(persistentAccess ? [] : [v.sessionOnlyNote()]),
+          v.signOutView(() => {
+            clearAuthorization();
+            render(currentRoute);
+          }),
+        ],
+        '',
+      );
     case 'vuelos':
       return mount(v.flightsView(trip), 'Vuelos');
     case 'hotel':

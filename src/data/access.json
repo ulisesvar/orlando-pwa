@@ -1,8 +1,3 @@
 {
-  "allowedEmails": [
-    "ulises.vargas@gmail.com",
-    "adriana.cano.mejia@gmail.com",
-    "Lilgarmont_14@hotmail.com",
-    "Gusos28@hotmail.com"
-  ]
+  "allowedEmails": ["ulises.vargas@gmail.com", "adriana.cano.mejia@gmail.com", "Lilgarmont_14@hotmail.com", "Gusos28@hotmail.com"]
 }

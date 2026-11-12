@@ -94,11 +94,13 @@ test.describe('hotel', () => {
     await expect(page.getByRole('heading', { name: 'Vacation Village at Parkway' })).toBeVisible();
     await expect(page.getByText('Kissimmee, Florida')).toBeVisible();
     const waze = page.getByRole('link', { name: /Ir con Waze/ });
-    await expect(waze).toHaveAttribute('href', /^https:\/\/waze\.com\/ul\?q=Vacation%20Village%20at%20Parkway.*&navigate=yes$/);
+    await expect(page.getByText('2975 Arabian Nights Blvd, Kissimmee, FL 34747, Estados Unidos')).toBeVisible();
+    await expect(waze).toHaveAttribute('href', /^https:\/\/waze\.com\/ul\?q=2975%20Arabian%20Nights%20Blvd.*34747.*&navigate=yes$/);
+    await expect(page.getByText(/check-?in|check-?out|checkout/i)).toHaveCount(0);
     await expect(waze).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(waze).toHaveAttribute('target', '_blank');
     const gm = page.getByRole('link', { name: /Google Maps/ });
-    await expect(gm).toHaveAttribute('href', /^https:\/\/www\.google\.com\/maps\/search\/\?api=1&query=Vacation%20Village/);
+    await expect(gm).toHaveAttribute('href', /^https:\/\/www\.google\.com\/maps\/search\/\?api=1&query=2975%20Arabian%20Nights%20Blvd/);
     await expect(gm).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(page.locator('main')).not.toContainText(/habitaci[oó]n n|reservaci[oó]n n/i);
   });
@@ -146,6 +148,7 @@ test.describe('navegación', () => {
   });
   test('uso con teclado', async ({ page }) => {
     await page.goto('/');
+    await expect(page.locator('a.card')).toHaveCount(4); // la vista se monta tras cargar los datos
     await page.keyboard.press('Tab');
     await expect(page.getByRole('link', { name: 'Saltar al contenido' })).toBeFocused();
     await page.keyboard.press('Tab');
@@ -159,8 +162,10 @@ test.describe('navegación', () => {
   });
   test('el foco es visible', async ({ page }) => {
     await page.goto('/');
+    await expect(page.locator('a.card')).toHaveCount(4);
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name: /Vuelos/ })).toBeFocused();
     const outline = await page
       .getByRole('link', { name: /Vuelos/ })
       .evaluate((e) => getComputedStyle(e).outlineStyle + getComputedStyle(e).outlineWidth);
@@ -214,6 +219,10 @@ test.describe('checklist', () => {
       });
     });
     await page.goto('/#/checklist');
+    // Sin almacenamiento no hay autorización persistente: se pide el correo y el acceso vive solo en memoria.
+    await page.getByLabel('Correo electrónico').fill('ulises.vargas@gmail.com');
+    await page.getByRole('button', { name: 'Entrar' }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Checklist');
     await page.getByLabel('Pasaportes vigentes para todos los viajeros').check();
     await expect(page.locator('#progress')).toHaveText(/^1 de/);
     await expect(page.getByRole('alert')).toContainText('no permite guardar');

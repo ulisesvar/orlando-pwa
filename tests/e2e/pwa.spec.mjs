@@ -57,6 +57,8 @@ test.describe('service worker y offline', () => {
     );
     for (const p of ['/', '/index.html', '/js/main.js', '/css/app.css', '/data/trip.json', '/manifest.webmanifest'])
       expect(cached).toContain(p);
+    // Acceso familiar: módulo, lista y todos los módulos JS/JSON necesarios offline.
+    for (const p of ['/js/auth.js', '/data/access.json', '/js/views.js', '/js/validate.js']) expect(cached).toContain(p);
     expect(cached).not.toContain('/sw.js');
   });
 
@@ -95,6 +97,7 @@ test.describe('actualización del service worker', () => {
     const port = 4190 + Math.floor(Math.random() * 500);
     const srv = spawn('node', ['scripts/serve.mjs'], { env: { ...process.env, SERVE_DIR: dir, PORT: String(port) }, stdio: 'ignore' });
     const ctx = await browser.newContext();
+    await ctx.addInitScript(() => localStorage.setItem('orlando-family-email-v1', 'ulises.vargas@gmail.com'));
     const page = await ctx.newPage();
     try {
       await expect
@@ -133,6 +136,46 @@ test.describe('actualización del service worker', () => {
       await ctx.close();
       srv.kill();
       rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+test.describe('acceso familiar sin conexión', () => {
+  test('tras autorizar una vez, la app abre sin conexión y sin pedir el correo', async ({ browser, baseURL }) => {
+    const ctx = await browser.newContext({ baseURL });
+    const page = await ctx.newPage();
+    try {
+      await page.goto('/');
+      await page.getByLabel('Correo electrónico').fill('Adriana.Cano.Mejia@gmail.com ');
+      await page.getByRole('button', { name: 'Entrar' }).click();
+      await expect(page.locator('a.card')).toHaveCount(4);
+      await page.evaluate(() => navigator.serviceWorker.ready);
+      await page.reload();
+      await expect.poll(() => controlled(page)).toBe(true);
+      await ctx.setOffline(true);
+      await page.reload();
+      await expect(page.getByLabel('Correo electrónico')).toHaveCount(0);
+      await expect(page.locator('a.card')).toHaveCount(4);
+      await page.getByRole('link', { name: /Hotel/ }).click();
+      await expect(page.getByText('2975 Arabian Nights Blvd')).toBeVisible();
+    } finally {
+      await ctx.close();
+    }
+  });
+  test('sin autorización previa tampoco hay acceso sin conexión a los datos', async ({ browser, baseURL }) => {
+    const ctx = await browser.newContext({ baseURL });
+    const page = await ctx.newPage();
+    try {
+      await page.goto('/#/checklist');
+      await page.evaluate(() => navigator.serviceWorker.ready);
+      await page.reload();
+      await expect.poll(() => controlled(page)).toBe(true);
+      await ctx.setOffline(true);
+      await page.reload();
+      await expect(page.getByLabel('Correo electrónico')).toBeVisible();
+      await expect(page.locator('a.card, #progress')).toHaveCount(0);
+    } finally {
+      await ctx.close();
     }
   });
 });
