@@ -125,10 +125,8 @@ export function hotelView(trip) {
         { class: 'facts' },
         h('dt', {}, 'Dirección'),
         h('dd', {}, ht.address ?? 'Por confirmar con el hotel'),
-        h('dt', {}, 'Check-in'),
-        h('dd', {}, ht.checkIn ?? 'Por confirmar'),
-        h('dt', {}, 'Checkout'),
-        h('dd', {}, ht.checkOut ?? 'Por confirmar'),
+        ...(ht.checkIn ? [h('dt', {}, 'Check-in'), h('dd', {}, ht.checkIn)] : []),
+        ...(ht.checkOut ? [h('dt', {}, 'Checkout'), h('dd', {}, ht.checkOut)] : []),
       ),
     ),
     h(
@@ -137,7 +135,7 @@ export function hotelView(trip) {
       extLink(wazeUrl(ht.mapQuery), 'btn btn-primary', 'Ir con Waze'),
       extLink(googleMapsUrl(ht.mapQuery), 'btn btn-secondary', 'Abrir en Google Maps'),
     ),
-    h('p', { class: 'note' }, 'Los enlaces buscan el hotel por nombre y ciudad.'),
+    h('p', { class: 'note' }, 'Los enlaces buscan el hotel por su dirección.'),
   );
 }
 
@@ -253,3 +251,55 @@ export const notFoundView = () =>
     h('a', { href: routeHref('home'), class: 'btn btn-primary' }, 'Ir al inicio'),
   );
 export { cap, weekdayName };
+
+export function accessView({ onSubmit }) {
+  const input = h('input', {
+    id: 'family-email',
+    type: 'email',
+    required: true,
+    autocomplete: 'email',
+    inputmode: 'email',
+    placeholder: 'nombre@correo.com',
+    class: 'field',
+  });
+  const feedback = h('p', { role: 'alert', 'aria-live': 'polite' });
+  return [
+    h(
+      'header',
+      { class: 'hero' },
+      h('p', { class: 'eyebrow' }, 'NUESTRO VIAJE'),
+      h('h1', { id: 'page-title', tabindex: '-1' }, 'Orlando 2026'),
+    ),
+    h(
+      'section',
+      { class: 'panel' },
+      h('h2', {}, 'Bienvenido'),
+      h('p', {}, 'Escribe tu correo autorizado. Solo tendrás que hacerlo una vez en este dispositivo.'),
+      h(
+        'form',
+        {
+          onsubmit: (event) => {
+            event.preventDefault();
+            onSubmit(input.value, feedback);
+          },
+        },
+        h('label', { for: 'family-email' }, 'Correo electrónico'),
+        input,
+        h('button', { type: 'submit', class: 'btn btn-primary' }, 'Entrar'),
+        feedback,
+      ),
+    ),
+  ];
+}
+
+export function signOutView(onSignOut) {
+  return h('div', { class: 'actions' }, h('button', { type: 'button', class: 'btn btn-secondary', onclick: onSignOut }, 'Cambiar usuario'));
+}
+
+export function sessionOnlyNote() {
+  return h(
+    'p',
+    { class: 'note', role: 'status' },
+    'Este navegador no permite guardar el acceso: tendrás que escribir tu correo de nuevo al cerrar la aplicación.',
+  );
+}

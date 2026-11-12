@@ -65,9 +65,9 @@ describe('vuelos', () => {
       'MCO',
     ]);
   });
-  it('no inventa aeropuertos no confirmados', () => {
-    expect(trip.flights.legs[0].departure.place).toBeNull();
-    expect(trip.flights.legs[1].arrival.place).toBeNull();
+  it('usa el aeropuerto MEX confirmado para ambos trayectos', () => {
+    expect(trip.flights.legs[0].departure.place.code).toBe('MEX');
+    expect(trip.flights.legs[1].arrival.place.code).toBe('MEX');
   });
 });
 

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../e2e/fixtures.mjs';
 import { readFileSync } from 'node:fs';
 
 const payload = '<img src=x onerror="window.__xss=1"><script>window.__xss=2</script>';
@@ -40,24 +40,27 @@ test.describe('datos manipulados (XSS)', () => {
     expect(u.searchParams.get('navigate')).toBe('yes');
     expect(await page.getByRole('link', { name: /Waze/ }).getAttribute('onmouseover')).toBeNull();
   });
-  test('datos que violan el esquema muestran error y no renderizan contenido', async ({ page }) => {
-    await serve(page, (t) => {
-      t.days[0].date = 'javascript:alert(1)';
-      t.injected = payload;
+  test.describe('errores controlados (el navegador registra la falla)', () => {
+    test.use({ expectConsoleErrors: true });
+    test('datos que violan el esquema muestran error y no renderizan contenido', async ({ page }) => {
+      await serve(page, (t) => {
+        t.days[0].date = 'javascript:alert(1)';
+        t.injected = payload;
+      });
+      await page.goto('/');
+      await expect(page.getByRole('heading', { name: 'No se pudo cargar' })).toBeVisible();
+      await expect(page.locator('a.card')).toHaveCount(0);
+      expect(await page.evaluate(() => window.__xss)).toBeUndefined();
     });
-    await page.goto('/');
-    await expect(page.getByRole('heading', { name: 'No se pudo cargar' })).toBeVisible();
-    await expect(page.locator('a.card')).toHaveCount(0);
-    expect(await page.evaluate(() => window.__xss)).toBeUndefined();
-  });
-  test('JSON roto o respuesta 500 muestran error controlado', async ({ page }) => {
-    await page.route('**/data/trip.json', (r) => r.fulfill({ status: 200, body: '{no es json', contentType: 'application/json' }));
-    await page.goto('/');
-    await expect(page.getByRole('alert')).toBeVisible();
-    await page.unroute('**/data/trip.json');
-    await page.route('**/data/trip.json', (r) => r.fulfill({ status: 500, body: 'boom' }));
-    await page.reload();
-    await expect(page.getByRole('alert')).toBeVisible();
+    test('JSON roto o respuesta 500 muestran error controlado', async ({ page }) => {
+      await page.route('**/data/trip.json', (r) => r.fulfill({ status: 200, body: '{no es json', contentType: 'application/json' }));
+      await page.goto('/');
+      await expect(page.getByRole('alert')).toBeVisible();
+      await page.unroute('**/data/trip.json');
+      await page.route('**/data/trip.json', (r) => r.fulfill({ status: 500, body: 'boom' }));
+      await page.reload();
+      await expect(page.getByRole('alert')).toBeVisible();
+    });
   });
   test('rutas manipuladas en el hash no ejecutan código', async ({ page }) => {
     await page.goto('/#/calendario/%3Cimg%20src=x%20onerror=window.__xss=4%3E');

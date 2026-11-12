@@ -505,3 +505,17 @@ a {
     font-size: 0.6875rem;
   }
 }
+
+.field {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 12px;
+  margin: 8px 0 16px;
+  font: inherit;
+  color: inherit;
+  background: var(--surface, transparent);
+  border: 1px solid currentColor;
+  border-radius: 8px;
+}
