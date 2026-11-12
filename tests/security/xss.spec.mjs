@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../e2e/fixtures.mjs';
 import { readFileSync } from 'node:fs';
 
 const payload = '<img src=x onerror="window.__xss=1"><script>window.__xss=2</script>';
