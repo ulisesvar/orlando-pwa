@@ -58,7 +58,17 @@ test.describe('service worker y offline', () => {
     for (const p of ['/', '/index.html', '/js/main.js', '/css/app.css', '/data/trip.json', '/manifest.webmanifest'])
       expect(cached).toContain(p);
     // Acceso familiar: módulo, lista y todos los módulos JS/JSON necesarios offline.
-    for (const p of ['/js/auth.js', '/js/itinerary.js', '/data/itineraries.json', '/data/access.json', '/js/views.js', '/js/validate.js'])
+    for (const p of [
+      '/img/orlando-castillo-640.webp',
+      '/img/orlando-castillo-960.webp',
+      '/img/orlando-castillo-1280.webp',
+      '/js/auth.js',
+      '/js/itinerary.js',
+      '/data/itineraries.json',
+      '/data/access.json',
+      '/js/views.js',
+      '/js/validate.js',
+    ])
       expect(cached).toContain(p);
     expect(cached).not.toContain('/sw.js');
   });
@@ -68,7 +78,8 @@ test.describe('service worker y offline', () => {
     await context.setOffline(true);
     await page.reload();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Orlando 2026');
-    await expect(page.locator('.week-day')).toHaveCount(7);
+    await expect(page.locator('.hero-photo img')).toBeVisible();
+    expect(await page.locator('.hero-photo img').evaluate((i) => i.complete && i.naturalWidth > 0)).toBe(true); // la foto sale de la caché
     await page.getByRole('link', { name: /Vuelos/ }).click();
     await expect(page.getByText('Y4780')).toBeVisible();
     await page.goto('/#/calendario/2026-12-10');

@@ -57,4 +57,4 @@ Capturas con emulación Pixel 7 (Chromium), con las dos primeras actividades mar
 
 - Calendario 9 de diciembre: `docs/calendario-movil-2026-12-09.png` (parte superior) y `docs/calendario-movil-2026-12-09-recorrido.png` (recorrido).
 - Calendario 10 de diciembre: `docs/calendario-movil-2026-12-10.png` y `docs/calendario-movil-2026-12-10-recorrido.png`.
-- Inicio sin la tarjeta «Recorrido»: `docs/calendario-movil-inicio.png`.
+- Inicio sin la tarjeta «Recorrido»: `docs/inicio-movil.png` (con la fotografía de portada).

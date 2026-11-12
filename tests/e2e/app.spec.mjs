@@ -1,23 +1,11 @@
 import { test, expect } from './fixtures.mjs';
 
 test.describe('pantalla principal', () => {
-  test('encabezado, siete días y cuatro tarjetas', async ({ page }) => {
+  test('encabezado, fotografía y cuatro tarjetas', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByText('NUESTRO VIAJE')).toBeVisible();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Orlando 2026');
     await expect(page.getByText('5–11 de diciembre de 2026')).toBeVisible();
-    const days = page.locator('.week-day');
-    await expect(days).toHaveCount(7);
-    await expect(days).toHaveText([
-      /Sáb\s*5\s*Llegada \/ Walmart/,
-      /Dom\s*6\s*Universal/,
-      /Lun\s*7\s*Mall/,
-      /Mar\s*8\s*Libre/,
-      /Mié\s*9\s*Magic Kingdom/,
-      /Jue\s*10\s*Very Merry/,
-      /Vie\s*11\s*Regreso/,
-    ]);
-    await expect(page.locator('.week a, .week button')).toHaveCount(0); // informativo, no interactivo
     const cards = page.locator('a.card');
     await expect(cards).toHaveCount(4);
     await expect(cards).toHaveText([
@@ -28,12 +16,10 @@ test.describe('pantalla principal', () => {
     ]);
   });
 
-  test('las siete columnas caben en una fila en móvil y las tarjetas son 2×2', async ({ page, isMobile }) => {
+  test('las tarjetas son 2×2 en móvil', async ({ page, isMobile }) => {
     test.skip(!isMobile);
     await page.goto('/');
     await expect(page.locator('a.card')).toHaveCount(4); // esperar al montaje de la vista
-    const tops = await page.locator('.week-day').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
-    expect(new Set(tops).size).toBe(1);
     const boxes = await page.locator('a.card').evaluateAll((els) =>
       els.map((e) => {
         const r = e.getBoundingClientRect();

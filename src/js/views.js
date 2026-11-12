@@ -37,23 +37,20 @@ export function homeView(trip) {
       h('h1', { id: 'page-title', tabindex: '-1' }, trip.title),
       h('p', { class: 'dates' }, rangeLabel(trip.startDate, trip.endDate)),
     ),
+    // Fotografía decorativa (alt vacío, no interactiva) guardada localmente; crédito exigido por su licencia CC BY-SA 2.0.
     h(
-      'section',
-      { 'aria-labelledby': 'week-h' },
-      h('h2', { id: 'week-h', class: 'sr-only' }, 'Resumen de la semana'),
-      h(
-        'ol',
-        { class: 'week' },
-        trip.days.map((d) =>
-          h(
-            'li',
-            { class: 'week-day' },
-            h('span', { class: 'wd' }, weekdayShort(d.date)),
-            h('span', { class: 'wn' }, String(dayNumber(d.date))),
-            h('span', { class: 'wa' }, d.short),
-          ),
-        ),
-      ),
+      'figure',
+      { class: 'hero-photo' },
+      h('img', {
+        src: './img/orlando-castillo-960.webp',
+        srcset: './img/orlando-castillo-640.webp 640w, ./img/orlando-castillo-960.webp 960w, ./img/orlando-castillo-1280.webp 1280w',
+        sizes: '(min-width: 576px) 544px, calc(100vw - 32px)',
+        width: 1280,
+        height: 720,
+        alt: '',
+        decoding: 'async',
+      }),
+      h('figcaption', {}, 'Foto: Michael Gray · CC BY-SA 2.0'),
     ),
     h(
       'nav',
@@ -75,6 +72,17 @@ export function homeView(trip) {
           ),
         ),
       ),
+    ),
+    h(
+      'p',
+      { class: 'note credit' },
+      'Fuente de la fotografía de portada: ',
+      extLink(
+        'https://commons.wikimedia.org/wiki/File:Magic_Kingdom_-_Cinderella_Castle_panorama_-_by_mrkathika.jpg',
+        'inline-link',
+        'Wikimedia Commons',
+      ),
+      ' (licencia CC BY-SA 2.0; recortada y optimizada).',
     ),
   ];
 }
