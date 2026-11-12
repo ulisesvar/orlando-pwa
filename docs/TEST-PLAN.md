@@ -47,4 +47,4 @@ npm run test:container           # contra la imagen real con Nginx (requiere Doc
 - Solo Chromium; "móvil" es emulación de Pixel 7, **no se probó en dispositivos físicos** ni en Safari/iOS (instalación en pantalla de inicio de iOS sin verificar).
 - La instalabilidad se verifica con el diagnóstico de Chromium (`Page.getInstallabilityErrors`), no con el diálogo de instalación real.
 - No se verificó TLS/HSTS/Cloudflare Access (fuera del repositorio).
-- El resultado de los workflows de GitHub Actions no se ha ejecutado todavía en el momento de escribir este documento.
+- CI en GitHub Actions (run 43265919991 del PR #1): los 6 jobs pasan (lint, unitarias, E2E+a11y+seguridad, Gitleaks, dependencias, imagen Docker con Trivy, SBOM y verificación del contenedor). El workflow Release no se ha ejecutado.
