@@ -25,7 +25,7 @@ Resultados **reales** de las ejecuciones locales (macOS, Node 24, Docker 28, Chr
 | --- | --- |
 | `eslint .` / `prettier --check .` | Sin errores |
 | `npm run validate:data` | `trip.json` válido |
-| `vitest run` | **87 / 87 pasan** (8 archivos) |
+| `vitest run` | **88 / 88 pasan** (8 archivos) |
 | Playwright contra `dist/` servido por Node (mobile + desktop) | **77 pasan**, 69 omitidos (las pruebas de cabeceras exigen Nginx; 1 prueba exclusiva de móvil se omite en desktop) |
 | `scripts/verify-container.sh` (imagen final + Compose endurecido + Playwright contra Nginx, mobile + desktop, e2e + security) | **145 pasan, 1 omitida** (la de columnas en móvil, que en el proyecto desktop no aplica); 0 fallos |
 | Gitleaks (v8.30.1, imagen fijada por digest) sobre el repositorio | Sin fugas |

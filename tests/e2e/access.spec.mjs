@@ -16,9 +16,9 @@ test('recuerda el correo autorizado tras recargar', async ({ page }) => {
   await page.goto('/');
   await page.getByLabel('Correo electrónico').fill(' ULISES.VARGAS@GMAIL.COM '.trim());
   await page.getByRole('button', { name: 'Entrar' }).click();
-  await expect(page.locator('a.card')).toHaveCount(5);
+  await expect(page.locator('a.card')).toHaveCount(4);
   await page.reload();
-  await expect(page.locator('a.card')).toHaveCount(5);
+  await expect(page.locator('a.card')).toHaveCount(4);
   await expect(page.getByLabel('Correo electrónico')).toHaveCount(0);
 });
 

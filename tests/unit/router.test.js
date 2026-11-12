@@ -8,8 +8,10 @@ describe('router', () => {
     for (const n of ['vuelos', 'hotel', 'checklist', 'calendario']) expect(parseRoute(`#/${n}`)).toEqual({ name: n });
     expect(parseRoute('#/calendario/2026-12-07')).toEqual({ name: 'calendario', date: '2026-12-07' });
     expect(parseRoute('#/hotel/')).toEqual({ name: 'hotel' });
-    expect(parseRoute('#/itinerarios')).toEqual({ name: 'itinerarios' });
-    expect(parseRoute('#/itinerarios/2026-12-09')).toEqual({ name: 'itinerarios', date: '2026-12-09' });
+  });
+  it('las rutas heredadas de itinerarios redirigen a Calendario', () => {
+    expect(parseRoute('#/itinerarios')).toEqual({ name: 'redirect', to: '#/calendario' });
+    expect(parseRoute('#/itinerarios/2026-12-09')).toEqual({ name: 'redirect', to: '#/calendario/2026-12-09' });
   });
   it('rutas inválidas o manipuladas', () => {
     for (const h of [

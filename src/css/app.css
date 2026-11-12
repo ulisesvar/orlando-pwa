@@ -521,25 +521,12 @@ a {
 }
 
 /* Recorrido (itinerarios) */
-.it-tabs {
-  display: flex;
-  gap: 8px;
-  list-style: none;
-  margin: 0 0 16px;
-  padding: 0;
+.recorrido {
+  margin-top: 24px;
 }
-.it-tabs li {
-  flex: 1;
-}
-.it-tab {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 48px;
-  width: 100%;
-  text-align: center;
-  padding: 8px;
-  font-weight: 600;
+.recorrido-title {
+  margin: 0 0 12px;
+  font-size: 1.3rem;
 }
 .warn-prov {
   border-left: 4px solid var(--accent);

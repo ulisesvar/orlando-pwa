@@ -48,6 +48,7 @@ function mount(nodes, title) {
 }
 
 function render(route) {
+  if (route.name === 'redirect') return window.location.replace(route.to);
   currentRoute = route;
   if (!allowedEmails.length) return mount(v.errorView('No se pudo cargar la configuración de acceso.'), 'Error');
   if (!isAuthorized(allowedEmails))
@@ -82,13 +83,12 @@ function render(route) {
       return mount(v.flightsView(trip), 'Vuelos');
     case 'hotel':
       return mount(v.hotelView(trip), 'Hotel');
-    case 'calendario':
-      return mount(v.calendarView(trip, route.date), 'Calendario');
-    case 'itinerarios':
-      if (!itineraries) return mount(v.errorView('El recorrido no es válido o no están disponibles.'), 'Error');
-      if (!route.date) return mount(v.itinerariesIndexView(itineraries.days, tracker), 'Recorrido');
-      if (!itineraries.days.some((d) => d.date === route.date)) return mount(v.notFoundView(), 'No encontrada');
-      return mount(v.itineraryDayView(itineraries.days, route.date, tracker), 'Recorrido');
+    case 'calendario': {
+      // El recorrido se determina por la fecha seleccionada (o la primera si no hay ninguna).
+      const date = route.date ?? trip.days[0].date;
+      const day = itineraries?.days.find((d) => d.date === date);
+      return mount(v.calendarView(trip, route.date, day ? v.recorridoView(day, tracker) : null), 'Calendario');
+    }
     case 'checklist':
       return renderChecklist();
     default:

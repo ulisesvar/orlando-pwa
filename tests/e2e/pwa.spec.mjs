@@ -149,23 +149,23 @@ test.describe('acceso familiar sin conexión', () => {
       await page.goto('/');
       await page.getByLabel('Correo electrónico').fill('Adriana.Cano.Mejia@gmail.com ');
       await page.getByRole('button', { name: 'Entrar' }).click();
-      await expect(page.locator('a.card')).toHaveCount(5);
+      await expect(page.locator('a.card')).toHaveCount(4);
       await page.evaluate(() => navigator.serviceWorker.ready);
       await page.reload();
       await expect.poll(() => controlled(page)).toBe(true);
       await ctx.setOffline(true);
       await page.reload();
       await expect(page.getByLabel('Correo electrónico')).toHaveCount(0);
-      await expect(page.locator('a.card')).toHaveCount(5);
+      await expect(page.locator('a.card')).toHaveCount(4);
       await page.getByRole('link', { name: /Hotel/ }).click();
       await expect(page.getByText('2975 Arabian Nights Blvd')).toBeVisible();
-      // Itinerarios disponibles y con estado persistente sin conexión.
-      await page.goto('/#/itinerarios/2026-12-10');
-      await expect(page.getByRole('heading', { level: 1 })).toHaveText("Mickey's Very Merry Christmas Party");
+      // Recorrido (dentro de Calendario) disponible y con estado persistente sin conexión.
+      await page.goto('/#/calendario/2026-12-10');
+      await expect(page.getByRole('heading', { level: 2, name: /Recorrido: Mickey's Very Merry Christmas Party/ })).toBeVisible();
       await page.getByRole('checkbox', { name: /Fuegos artificiales navideños/ }).check();
       await page.reload();
       await expect(page.getByRole('checkbox', { name: /Fuegos artificiales navideños/ })).toBeChecked();
-      await page.goto('/#/itinerarios/2026-12-09');
+      await page.goto('/#/calendario/2026-12-09');
       await expect(page.locator('.it-item')).toHaveCount(17);
     } finally {
       await ctx.close();

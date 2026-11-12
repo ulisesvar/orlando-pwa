@@ -1,6 +1,6 @@
 # Recorrido de Magic Kingdom (v1.1.0)
 
-Dos itinerarios independientes: **miércoles 9 de diciembre de 2026** (Magic Kingdom) y **jueves 10 de diciembre de 2026** (Mickey's Very Merry Christmas Party). Nombre visible: **«Recorrido»**; las rutas internas conservan `itinerarios` para no romper enlaces ni la caché. Rutas: `#/itinerarios`, `#/itinerarios/2026-12-09`, `#/itinerarios/2026-12-10`.
+Dos itinerarios independientes: **miércoles 9 de diciembre de 2026** (Magic Kingdom) y **jueves 10 de diciembre de 2026** (Mickey's Very Merry Christmas Party). **«Recorrido» es una subsección de Calendario**, justo debajo de la agenda del día seleccionado: `#/calendario/2026-12-09` muestra el recorrido de Magic Kingdom y `#/calendario/2026-12-10` el de la fiesta navideña. Cualquier otra fecha (y `#/calendario` sin fecha, que abre el 5 de diciembre) muestra solo la agenda. No hay tarjeta propia en el inicio ni una segunda navegación por fechas: la fecha elegida en Calendario determina el recorrido. Las rutas heredadas `#/itinerarios` y `#/itinerarios/AAAA-MM-DD` redirigen a `#/calendario` y `#/calendario/AAAA-MM-DD`.
 
 ## Diseño
 
@@ -10,7 +10,8 @@ Dos itinerarios independientes: **miércoles 9 de diciembre de 2026** (Magic Kin
 - Migración: el formato `v: 1` no cambia. Los valores `skipped` guardados por la versión anterior del PR se leen como pendientes y se descartan en el siguiente guardado; las `done` se conservan. La clave es distinta de la del checklist (`orlando2026:checklist:v1`), que no se lee ni se modifica. Estado corrupto o con ids ajenos se ignora.
 - «Siguiente» es la primera actividad pendiente en orden cronológico (no depende del reloj del teléfono).
 - Offline: `scripts/build.mjs` precachea todo `dist/`, por lo que `itineraries.json` y `itinerary.js` entran en el Service Worker y su hash de caché cambia. Los enlaces a fuentes oficiales son solo informativos y no se necesitan para mostrar el itinerario.
-- Si `itineraries.json` es inválido o no carga, solo esa sección muestra un error; el resto de la app sigue funcionando.
+- Si `itineraries.json` es inválido o no carga, Calendario sigue mostrando su agenda y simplemente no aparece el recorrido.
+- En los días con recorrido se omite la nota «No hay horarios definidos para las actividades», porque el recorrido ya trae horarios (provisionales cuando aplica).
 
 ## Correcciones respecto al borrador original
 
@@ -40,18 +41,20 @@ Supuestos: las horas de la tabla original se conservan como orden orientativo; l
 
 ## Validación manual (móvil)
 
-1. Abrir la app, entrar con un correo autorizado y tocar «Recorrido». Deben aparecer los dos días con su fecha.
-2. Entrar al 9 de diciembre: lista de 17 actividades desde 07:45 hasta «Última hora», con prioridad y categoría visibles y el aviso de horarios orientativos.
-3. Marcar las dos primeras actividades con su casilla (también funciona tocar la tarjeta). Debe cambiar «Realizadas: X de N», la barra y «Siguiente». Desmarcar una la devuelve a pendiente.
+1. Abrir la app y entrar con un correo autorizado. El inicio debe tener cuatro tarjetas (Vuelos, Hotel, Calendario, Checklist), sin «Recorrido».
+2. Calendario → Miércoles 9: bajo la agenda aparece «Recorrido: Magic Kingdom» con 17 actividades desde 07:45 hasta «Última hora», prioridad y categoría visibles y el aviso de horarios orientativos.
+3. Marcar las dos primeras actividades (la casilla o cualquier parte de la tarjeta). Debe cambiar «Realizadas: X de N», la barra y «Siguiente». Desmarcar una la devuelve a pendiente.
 4. Cerrar y reabrir la app: el estado se conserva.
-5. Cambiar al 10 de diciembre: todo sigue pendiente (independiente). Los desfiles, fuegos y encuentros llevan «Horario provisional».
-6. Activar modo avión y reabrir: los itinerarios y su estado siguen disponibles.
-7. Comprobar que el checklist conserva sus marcas.
-8. Pendiente en dispositivos físicos (iPhone y Android): las pruebas automáticas usan Chromium con emulación móvil.
+5. Cambiar a Jueves 10: aparece el recorrido de la fiesta (18 actividades), todo pendiente (independiente), con «Horario provisional» en desfiles, fuegos y encuentros. Volver al 9: lo marcado sigue marcado.
+6. Cambiar a Sábado 5, Viernes 11 u otro día: solo la agenda.
+7. Activar modo avión y reabrir: Calendario, el recorrido y su estado siguen disponibles.
+8. Comprobar que el checklist conserva sus marcas.
+9. Pendiente en dispositivos físicos (iPhone y Android): las pruebas automáticas usan Chromium con emulación móvil.
 
 ## Evidencia visual
 
-Capturas con emulación Pixel 7 (Chromium) con las dos primeras actividades marcadas:
+Capturas con emulación Pixel 7 (Chromium), con las dos primeras actividades marcadas:
 
-- `docs/itinerario-movil-2026-12-09.png`
-- `docs/itinerario-movil-2026-12-10.png`
+- Calendario 9 de diciembre: `docs/calendario-movil-2026-12-09.png` (parte superior) y `docs/calendario-movil-2026-12-09-recorrido.png` (recorrido).
+- Calendario 10 de diciembre: `docs/calendario-movil-2026-12-10.png` y `docs/calendario-movil-2026-12-10-recorrido.png`.
+- Inicio sin la tarjeta «Recorrido»: `docs/calendario-movil-inicio.png`.

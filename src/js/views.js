@@ -27,7 +27,6 @@ export function homeView(trip) {
     ['vuelos', 'plane', 'Vuelos', 'Horarios y detalles'],
     ['hotel', 'hotel', 'Hotel', 'Ubicación y Waze'],
     ['calendario', 'calendar', 'Calendario', 'Actividades por día'],
-    ['itinerarios', 'navigate', 'Recorrido', 'Magic Kingdom: 9 y 10 de diciembre'],
     ['checklist', 'checklist', 'Checklist', 'Lista de pendientes'],
   ];
   return [
@@ -140,7 +139,7 @@ export function hotelView(trip) {
   );
 }
 
-export function calendarView(trip, selected) {
+export function calendarView(trip, selected, recorrido = null) {
   const sel = trip.days.find((d) => d.date === selected) ?? null;
   const current = sel ?? trip.days[0];
   return page(
@@ -181,7 +180,7 @@ export function calendarView(trip, selected) {
         current.items.map((t) => h('li', {}, t)),
       ),
     ),
-    h('p', { class: 'note' }, 'No hay horarios definidos para las actividades; se agregarán cuando estén confirmados.'),
+    recorrido ?? h('p', { class: 'note' }, 'No hay horarios definidos para las actividades; se agregarán cuando estén confirmados.'),
   );
 }
 
@@ -316,40 +315,9 @@ const CATEGORY_LABEL = {
 
 const progressText = (p) => `Realizadas: ${p.done} de ${p.total}`;
 
-export function itinerariesIndexView(days, tracker) {
-  return page(
-    'Recorrido',
-    h(
-      'p',
-      { class: 'lead' },
-      'Elige el día. Marca cada actividad al terminarla; el avance se guarda en este dispositivo y funciona sin conexión.',
-    ),
-    h(
-      'ul',
-      { class: 'cards' },
-      days.map((d) =>
-        h(
-          'li',
-          {},
-          h(
-            'a',
-            { href: routeHref('itinerarios', d.date), class: 'card' },
-            h(
-              'span',
-              { class: 'card-text' },
-              h('span', { class: 'card-title' }, d.title),
-              h('span', { class: 'card-sub' }, `${cap(longDate(d.date))} · ${progressText(tracker.progress(d.date))}`),
-            ),
-            icon('chevron', 'icon card-chev'),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-export function itineraryDayView(days, date, tracker) {
-  const day = days.find((d) => d.date === date);
+// Subsección «Recorrido» de Calendario: se monta bajo la agenda del día cuando existe un recorrido para esa fecha.
+export function recorridoView(day, tracker) {
+  const date = day.date;
   const summary = h('section', { class: 'panel it-summary', 'aria-label': 'Progreso del día', id: 'it-summary' });
   const items = new Map();
 
@@ -417,28 +385,10 @@ export function itineraryDayView(days, date, tracker) {
 
   const list = h('ol', { class: 'it-list' }, day.activities.map(activity));
   refresh();
-  return page(
-    day.title,
-    h(
-      'nav',
-      { 'aria-label': 'Días del recorrido' },
-      h(
-        'ul',
-        { class: 'it-tabs' },
-        days.map((d) =>
-          h(
-            'li',
-            {},
-            h(
-              'a',
-              { href: routeHref('itinerarios', d.date), class: 'daytab it-tab', 'aria-current': d.date === date ? 'page' : false },
-              d.shortTitle,
-            ),
-          ),
-        ),
-      ),
-    ),
-    h('p', { class: 'lead' }, cap(longDate(date))),
+  return h(
+    'section',
+    { class: 'recorrido', 'aria-labelledby': 'recorrido-h' },
+    h('h2', { id: 'recorrido-h', class: 'recorrido-title' }, `Recorrido: ${day.title}`),
     h('p', { class: 'note warn-prov', id: 'it-disclaimer' }, day.disclaimer),
     summary,
     list,
