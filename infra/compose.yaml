@@ -1,4 +1,5 @@
-# Despliegue en Canumpe: /opt/canumpe/apps/viaje  (proyecto "viaje" -> contenedor viaje-web-1)
+# Plantilla para Canumpe: en el servidor el archivo real es /opt/canumpe/apps/viaje/compose.prod.yml
+# (proyecto "viaje" -> contenedor viaje-web-1). Ver docs/DEPLOYMENT.md.
 # Exportar ORLANDO_IMAGE con la referencia fijada por digest, p. ej.:
 #   ORLANDO_IMAGE=ghcr.io/ulisesvar/orlando-pwa@sha256:<digest>
 services:

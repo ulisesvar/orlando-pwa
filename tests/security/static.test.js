@@ -163,3 +163,23 @@ describe('workflows (cadena de suministro)', () => {
   });
   it('lockfile presente', () => expect(existsSync('package-lock.json')).toBe(true));
 });
+
+describe('documentación de despliegue', () => {
+  it('todo comando `docker compose` en DEPLOYMENT/ROLLBACK usa -f compose.prod.yml', () => {
+    for (const f of ['docs/DEPLOYMENT.md', 'docs/ROLLBACK.md']) {
+      const cmds = read(f)
+        .split('\n')
+        .filter((l) => /^\s*(?:\S.*&&\s*)?docker compose\b/.test(l) || /\|\| docker compose|; docker compose/.test(l));
+      expect(cmds.length, f).toBeGreaterThan(0);
+      for (const c of cmds) expect(c, `${f}: ${c}`).toMatch(/docker compose -f compose\.prod\.yml/);
+    }
+  });
+  it('mantiene puertos 127.0.0.1:3101 -> 8080 y no toca Nginx del host', () => {
+    expect(read('docs/DEPLOYMENT.md')).toMatch(/127\.0\.0\.1:3101:8080/);
+    expect(read('docs/DEPLOYMENT.md')).toMatch(/No se modifica el Nginx del host ni Cloudflare Tunnel/);
+  });
+  it('documenta required reviewers y la limitación de ignore-unfixed', () => {
+    expect(read('docs/DEPLOYMENT.md')).toMatch(/Required reviewers/);
+    expect(read('docs/SECURITY.md')).toMatch(/ignore-unfixed: true/);
+  });
+});

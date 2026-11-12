@@ -1,47 +1,83 @@
 # Despliegue en Canumpe (manual)
 
-GitHub Actions **no** accede a Canumpe. El despliegue lo hace una persona con acceso SSH, usando una imagen fijada por **digest**.
+GitHub Actions **no** accede a Canumpe. El despliegue lo hace una persona con acceso SSH, con una imagen fijada por **digest**. Directorio de producción: `/opt/canumpe/apps/viaje`; archivo Compose existente: **`compose.prod.yml`**. Todos los comandos usan `-f compose.prod.yml` de forma explícita.
 
-## 1. Obtener la referencia
+Puertos (sin cambios): host `127.0.0.1:3101` → contenedor `8080`. No se modifica el Nginx del host ni Cloudflare Tunnel.
 
-Tras ejecutar el workflow **Release**, copie del resumen del job la línea
-`ghcr.io/ulisesvar/orlando-pwa@sha256:<digest>`. No use `latest`.
+## 0. Antes de publicar la release (verificación obligatoria)
 
-## 2. Preparar el directorio (primera vez)
+`environment: production` en `.github/workflows/release.yml` solo exige aprobación manual si el environment tiene **Required reviewers**. Esto es una configuración de GitHub que el repositorio no puede imponer. Verifique en _Settings → Environments → production_ que:
+
+- «Required reviewers» incluye a al menos una persona autorizada, y
+- (recomendado) «Deployment branches» está limitado a `main`.
+
+Si el environment no existe o no tiene revisores, el job publicaría sin aprobación: **no ejecute Release hasta configurarlo**.
+
+## 1. Obtener la referencia nueva
+
+Tras ejecutar **Release**, copie del resumen del job `ghcr.io/ulisesvar/orlando-pwa@sha256:<digest-nuevo>`. No use `latest`.
+
+## 2. Respaldo previo (en Canumpe, antes de cambiar nada)
 
 ```bash
 cd /opt/canumpe/apps/viaje
-cp compose.yaml compose.yaml.bak-$(date +%F)     # respaldo del compose actual (ajuste el nombre si el archivo se llama distinto)
+STAMP=$(date +%F-%H%M)
+cp -p compose.prod.yml compose.prod.yml.bak-$STAMP          # respaldo del Compose actual
+[ -f .env ] && cp -p .env .env.bak-$STAMP                    # respaldo de .env, si existe
+
+# Registrar la imagen/digest que corre HOY (contenedor provisional viaje-web-1)
+docker inspect viaje-web-1 --format 'image={{.Config.Image}} id={{.Image}}' | tee previous-image-$STAMP.txt
+docker inspect viaje-web-1 --format '{{json .HostConfig.PortBindings}} {{.Config.User}}' | tee -a previous-image-$STAMP.txt
+docker image inspect "$(docker inspect viaje-web-1 --format '{{.Image}}')" --format '{{json .RepoDigests}}' | tee -a previous-image-$STAMP.txt
+docker compose -f compose.prod.yml config > compose.prod.resolved-$STAMP.yml   # configuración efectiva actual
 ```
 
-Copie `infra/compose.yaml` de este repositorio a `/opt/canumpe/apps/viaje/compose.yaml`. Cambios respecto al contenedor de prueba: puerto interno **8080** (`127.0.0.1:3101:8080`), usuario 101, rootfs de solo lectura, `cap_drop: ALL`, `no-new-privileges`, tmpfs en `/tmp`, rotación de logs.
-El nombre de servicio `web` en el directorio `viaje` conserva el nombre de contenedor `viaje-web-1`. **No** se toca Nginx del host, Cloudflare Tunnel ni DNS: el proxy actual ya apunta a `127.0.0.1:3101`; verifique que su `proxy_pass` use `http://127.0.0.1:3101` (el puerto del host no cambia).
+Conserve estos archivos: son la entrada de [ROLLBACK.md](ROLLBACK.md). Si la imagen provisional solo tiene etiqueta (sin digest en `RepoDigests`), el **image ID** `sha256:…` registrado sigue permitiendo restaurarla mientras la imagen exista localmente; no ejecute `docker image prune` hasta cerrar el despliegue.
 
-## 3. Desplegar
+## 3. Preparar el Compose nuevo
+
+Revise las diferencias entre el Compose actual y el del repositorio (`infra/compose.yaml`) y adáptelas a `compose.prod.yml`:
+
+```bash
+# Desde su equipo, con el repositorio en la rama/commit aprobado:
+scp infra/compose.yaml canumpe:/opt/canumpe/apps/viaje/compose.prod.yml.new
+# En Canumpe:
+cd /opt/canumpe/apps/viaje
+diff -u compose.prod.yml compose.prod.yml.new
+```
+
+Puntos que deben quedar: puerto `127.0.0.1:3101:8080` (el interno cambia a **8080** porque Nginx corre sin privilegios), `user: "101:101"`, `read_only: true`, `cap_drop: [ALL]`, `no-new-privileges:true`, tmpfs en `/tmp`, rotación de logs, servicio `web` (conserva el nombre `viaje-web-1`) y `image: ${ORLANDO_IMAGE:?…}`. Conserve cualquier ajuste propio de Canumpe (redes, etiquetas) que el diff muestre. Cuando esté conforme:
+
+```bash
+mv compose.prod.yml.new compose.prod.yml
+```
+
+## 4. Desplegar
 
 ```bash
 cd /opt/canumpe/apps/viaje
-export ORLANDO_IMAGE=ghcr.io/ulisesvar/orlando-pwa@sha256:<digest>
-echo "ORLANDO_IMAGE=$ORLANDO_IMAGE" > .env            # queda registrada la versión desplegada
-docker compose pull
-docker compose up -d
+export ORLANDO_IMAGE=ghcr.io/ulisesvar/orlando-pwa@sha256:<digest-nuevo>
+echo "ORLANDO_IMAGE=$ORLANDO_IMAGE" > .env
+docker compose -f compose.prod.yml config >/dev/null && echo "compose válido"
+docker compose -f compose.prod.yml pull
+docker compose -f compose.prod.yml up -d
 ```
 
-Si el paquete GHCR es privado: `docker login ghcr.io` con un PAT de solo `read:packages` (no se guarda en el repositorio). Si es público, no hace falta.
+Si el paquete GHCR es privado: `docker login ghcr.io` con un PAT de solo `read:packages` (no se guarda en el repositorio).
 
-## 4. Verificar
+## 5. Verificar
 
 ```bash
-docker compose ps                                         # STATUS: healthy
+docker compose -f compose.prod.yml ps                      # healthy
+curl -s http://127.0.0.1:3101/healthz                       # ok
 curl -sI http://127.0.0.1:3101/ | grep -iE "^(HTTP|content-security|x-content|referrer|permissions|cache)"
-curl -s http://127.0.0.1:3101/healthz                      # ok
 curl -sI https://viaje.canumpe.com/ | head -5
-docker inspect viaje-web-1 --format '{{.Config.User}} ro={{.HostConfig.ReadonlyRootfs}} {{json .HostConfig.PortBindings}}'
+docker inspect viaje-web-1 --format '{{.Config.Image}} user={{.Config.User}} ro={{.HostConfig.ReadonlyRootfs}} {{json .HostConfig.PortBindings}}'
 ```
 
-Abra la URL pública en un móvil y confirme el itinerario. Los dispositivos que ya instalaron la app se actualizan solos en la siguiente apertura.
+Debe mostrar el digest nuevo, `user=101:101`, `ro=true` y `{"8080/tcp":[{"HostIp":"127.0.0.1","HostPort":"3101"}]}`. Abra la URL pública en un móvil. Si algo falla, siga [ROLLBACK.md](ROLLBACK.md).
 
 ## Notas
 
 - HSTS lo emite Cloudflare; la imagen no lo añade.
-- Registre en `.env` (o en su bitácora) el digest anterior: lo necesita [ROLLBACK.md](ROLLBACK.md).
+- Mantenga `.env`, los respaldos y `previous-image-*.txt` hasta confirmar la estabilidad de la versión nueva.

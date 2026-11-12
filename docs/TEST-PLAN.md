@@ -11,7 +11,7 @@ Resultados **reales** de las ejecuciones locales (macOS, Node 24, Docker 28, Chr
 | Persistencia del checklist, datos corruptos, claves versionadas | `tests/unit/checklist.test.js` | 8 |
 | Manejo de errores de almacenamiento | `tests/unit/storage.test.js` | 2 |
 | Navegación (rutas válidas/manipuladas) | `tests/unit/router.test.js` | 4 |
-| Seguridad estática: código, privacidad, secretos, Dockerfile/Compose/Nginx, workflows | `tests/security/static.test.js` | 23 |
+| Seguridad estática: código, privacidad, secretos, Dockerfile/Compose/Nginx, workflows | `tests/security/static.test.js` | 26 |
 | E2E: inicio (7 días, 4 tarjetas 2×2, táctil ≥ 44 px), vuelos, hotel, calendario por día, checklist (persistencia, reset con confirmación, teclado, `localStorage` bloqueado/corrupto), Atrás/recarga, teclado y foco, 0 errores JS | `tests/e2e/app.spec.mjs` | 14 × 2 proyectos |
 | PWA: manifest e iconos, instalabilidad (CDP), precache, offline, no interceptar otros orígenes, **actualización del SW** | `tests/e2e/pwa.spec.mjs` | 6 × 2 |
 | Accesibilidad: axe (WCAG 2.0/2.1/2.2 A/AA) en 6 rutas × claro/oscuro; `prefers-reduced-motion` | `tests/e2e/a11y.spec.mjs` | 13 × 2 |
@@ -25,7 +25,7 @@ Resultados **reales** de las ejecuciones locales (macOS, Node 24, Docker 28, Chr
 | --- | --- |
 | `eslint .` / `prettier --check .` | Sin errores |
 | `npm run validate:data` | `trip.json` válido |
-| `vitest run` | **61 / 61 pasan** (6 archivos) |
+| `vitest run` | **64 / 64 pasan** (6 archivos) |
 | Playwright contra `dist/` servido por Node (mobile + desktop) | **77 pasan**, 69 omitidos (las pruebas de cabeceras exigen Nginx; 1 prueba exclusiva de móvil se omite en desktop) |
 | `scripts/verify-container.sh` (imagen final + Compose endurecido + Playwright contra Nginx, mobile + desktop, e2e + security) | **145 pasan, 1 omitida** (la de columnas en móvil, que en el proyecto desktop no aplica); 0 fallos |
 | Gitleaks (v8.30.1, imagen fijada por digest) sobre el repositorio | Sin fugas |
@@ -47,4 +47,4 @@ npm run test:container           # contra la imagen real con Nginx (requiere Doc
 - Solo Chromium; "móvil" es emulación de Pixel 7, **no se probó en dispositivos físicos** ni en Safari/iOS (instalación en pantalla de inicio de iOS sin verificar).
 - La instalabilidad se verifica con el diagnóstico de Chromium (`Page.getInstallabilityErrors`), no con el diálogo de instalación real.
 - No se verificó TLS/HSTS/Cloudflare Access (fuera del repositorio).
-- CI en GitHub Actions (run 43265919991 del PR #1): los 6 jobs pasan (lint, unitarias, E2E+a11y+seguridad, Gitleaks, dependencias, imagen Docker con Trivy, SBOM y verificación del contenedor). El workflow Release no se ha ejecutado.
+- CI en GitHub Actions (último run del PR #1): los 6 jobs pasan (lint, unitarias, E2E+a11y+seguridad, Gitleaks, dependencias, imagen Docker con Trivy, SBOM y verificación del contenedor). El workflow Release no se ha ejecutado.
