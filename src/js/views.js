@@ -27,6 +27,7 @@ export function homeView(trip) {
     ['vuelos', 'plane', 'Vuelos', 'Horarios y detalles'],
     ['hotel', 'hotel', 'Hotel', 'Ubicación y Waze'],
     ['calendario', 'calendar', 'Calendario', 'Actividades por día'],
+    ['itinerarios', 'navigate', 'Itinerarios', 'Magic Kingdom: 9 y 10 de diciembre'],
     ['checklist', 'checklist', 'Checklist', 'Lista de pendientes'],
   ];
   return [
@@ -301,5 +302,157 @@ export function sessionOnlyNote() {
     'p',
     { class: 'note', role: 'status' },
     'Este navegador no permite guardar el acceso: tendrás que escribir tu correo de nuevo al cerrar la aplicación.',
+  );
+}
+
+const CATEGORY_LABEL = {
+  traslado: 'Traslado',
+  atraccion: 'Atracción',
+  personaje: 'Personaje',
+  comida: 'Comida',
+  descanso: 'Descanso',
+  espectaculo: 'Espectáculo',
+};
+const STATUS_LABEL = { pending: 'Pendiente', done: 'Completada', skipped: 'Omitida' };
+
+const progressText = (p) => `Completadas: ${p.done} · Omitidas: ${p.skipped} · Pendientes: ${p.pending} de ${p.total}`;
+
+export function itinerariesIndexView(days, tracker) {
+  return page(
+    'Itinerarios',
+    h('p', { class: 'lead' }, 'Elige el día. El avance se guarda en este dispositivo y funciona sin conexión.'),
+    h(
+      'ul',
+      { class: 'cards' },
+      days.map((d) =>
+        h(
+          'li',
+          {},
+          h(
+            'a',
+            { href: routeHref('itinerarios', d.date), class: 'card' },
+            h(
+              'span',
+              { class: 'card-text' },
+              h('span', { class: 'card-title' }, d.title),
+              h('span', { class: 'card-sub' }, `${cap(longDate(d.date))} · ${progressText(tracker.progress(d.date))}`),
+            ),
+            icon('chevron', 'icon card-chev'),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+export function itineraryDayView(days, date, tracker) {
+  const day = days.find((d) => d.date === date);
+  const summary = h('section', { class: 'panel it-summary', 'aria-label': 'Progreso del día', id: 'it-summary' });
+  const items = new Map();
+
+  const refresh = () => {
+    const p = tracker.progress(date);
+    const next = tracker.next(date);
+    summary.replaceChildren(
+      h('p', { class: 'it-progress', role: 'status', id: 'it-progress' }, progressText(p)),
+      h('progress', { class: 'it-bar', max: p.total, value: p.done + p.skipped, 'aria-label': 'Actividades resueltas' }),
+      next
+        ? h('p', { class: 'it-next' }, h('strong', {}, 'Siguiente: '), `${next.label} · ${next.name}`)
+        : h('p', { class: 'it-next' }, h('strong', {}, 'Día completo: '), 'no quedan actividades pendientes.'),
+    );
+    for (const a of day.activities) {
+      const li = items.get(a.id);
+      const st = tracker.status(date, a.id);
+      li.className = `it-item st-${st}${next && next.id === a.id ? ' is-next' : ''}`;
+    }
+  };
+
+  const activity = (a) => {
+    const st = tracker.status(date, a.id);
+    const group = h(
+      'fieldset',
+      { class: 'it-status' },
+      h('legend', { class: 'sr-only' }, `Estado de ${a.name}`),
+      ['pending', 'done', 'skipped'].map((value) => {
+        const rid = `st-${a.id}-${value}`;
+        return h(
+          'span',
+          { class: 'it-opt' },
+          h('input', {
+            type: 'radio',
+            name: `st-${a.id}`,
+            id: rid,
+            value,
+            checked: st === value,
+            onchange: () => {
+              tracker.set(date, a.id, value);
+              refresh();
+            },
+          }),
+          h('label', { for: rid }, STATUS_LABEL[value]),
+        );
+      }),
+    );
+    const li = h(
+      'li',
+      { class: 'it-item' },
+      h('p', { class: 'it-time' }, a.label),
+      h(
+        'div',
+        { class: 'it-body' },
+        h('h3', { class: 'it-name' }, a.name),
+        h(
+          'p',
+          { class: 'it-tags' },
+          h('span', { class: `tag prio-${a.priority}` }, a.priority.charAt(0).toUpperCase() + a.priority.slice(1)),
+          h('span', { class: 'tag' }, CATEGORY_LABEL[a.category]),
+          a.provisional ? h('span', { class: 'tag tag-prov' }, 'Horario provisional') : null,
+        ),
+        h('p', {}, a.description),
+        h('p', { class: 'meta' }, `Zona: ${a.zone}`),
+        a.notes ? h('p', { class: 'it-note' }, h('strong', {}, 'Observación: '), a.notes) : null,
+        a.alternative ? h('p', { class: 'it-note' }, h('strong', {}, 'Alternativa: '), a.alternative) : null,
+        group,
+      ),
+    );
+    items.set(a.id, li);
+    return li;
+  };
+
+  const list = h('ol', { class: 'it-list' }, day.activities.map(activity));
+  refresh();
+  return page(
+    day.title,
+    h(
+      'nav',
+      { 'aria-label': 'Itinerarios' },
+      h(
+        'ul',
+        { class: 'it-tabs' },
+        days.map((d) =>
+          h(
+            'li',
+            {},
+            h(
+              'a',
+              { href: routeHref('itinerarios', d.date), class: 'daytab it-tab', 'aria-current': d.date === date ? 'page' : false },
+              d.shortTitle,
+            ),
+          ),
+        ),
+      ),
+    ),
+    h('p', { class: 'lead' }, cap(longDate(date))),
+    h('p', { class: 'note warn-prov', id: 'it-disclaimer' }, day.disclaimer),
+    summary,
+    list,
+    day.sources.length
+      ? h(
+          'p',
+          { class: 'note' },
+          'Fuentes oficiales para verificar: ',
+          day.sources.flatMap((s, i) => [i ? ' · ' : '', extLink(s.url, 'inline-link', s.label)]),
+        )
+      : null,
   );
 }

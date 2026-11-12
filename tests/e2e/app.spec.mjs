@@ -19,11 +19,12 @@ test.describe('pantalla principal', () => {
     ]);
     await expect(page.locator('.week a, .week button')).toHaveCount(0); // informativo, no interactivo
     const cards = page.locator('a.card');
-    await expect(cards).toHaveCount(4);
+    await expect(cards).toHaveCount(5);
     await expect(cards).toHaveText([
       /Vuelos\s*Horarios y detalles/,
       /Hotel\s*Ubicación y Waze/,
       /Calendario\s*Actividades por día/,
+      /Itinerarios\s*Magic Kingdom: 9 y 10 de diciembre/,
       /Checklist\s*Lista de pendientes/,
     ]);
   });
@@ -53,9 +54,9 @@ test.describe('pantalla principal', () => {
       expect(b.width).toBeGreaterThanOrEqual(44);
       expect(b.height).toBeGreaterThanOrEqual(44);
     }
-    for (const route of ['#/vuelos', '#/hotel', '#/calendario', '#/checklist']) {
+    for (const route of ['#/vuelos', '#/hotel', '#/calendario', '#/itinerarios', '#/itinerarios/2026-12-10', '#/checklist']) {
       await page.goto(`/${route}`);
-      for (const el of await page.locator('a.back, a.btn, a.daytab, .checks label, button').all()) {
+      for (const el of await page.locator('a.back, a.btn, a.daytab, .checks label, .it-status label, button').all()) {
         const b = await el.boundingBox();
         if (!b) continue;
         expect(b.height, `${route} alto`).toBeGreaterThanOrEqual(44);
@@ -148,7 +149,7 @@ test.describe('navegación', () => {
   });
   test('uso con teclado', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('a.card')).toHaveCount(4); // la vista se monta tras cargar los datos
+    await expect(page.locator('a.card')).toHaveCount(5); // la vista se monta tras cargar los datos
     await page.keyboard.press('Tab');
     await expect(page.getByRole('link', { name: 'Saltar al contenido' })).toBeFocused();
     await page.keyboard.press('Tab');
@@ -162,7 +163,7 @@ test.describe('navegación', () => {
   });
   test('el foco es visible', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('a.card')).toHaveCount(4);
+    await expect(page.locator('a.card')).toHaveCount(5);
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     await expect(page.getByRole('link', { name: /Vuelos/ })).toBeFocused();

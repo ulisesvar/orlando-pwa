@@ -11,6 +11,10 @@ export function parseRoute(hash) {
     if (arg === undefined) return { name };
     return isRealDate(arg) ? { name, date: arg } : { name: 'notfound' };
   }
+  if (name === 'itinerarios') {
+    if (arg === undefined) return { name };
+    return isRealDate(arg) ? { name, date: arg } : { name: 'notfound' };
+  }
   return { name: 'notfound' };
 }
 

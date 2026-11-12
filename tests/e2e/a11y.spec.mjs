@@ -2,7 +2,17 @@ import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures.mjs';
 
 for (const scheme of ['light', 'dark']) {
-  for (const route of ['', '#/vuelos', '#/hotel', '#/calendario', '#/calendario/2026-12-10', '#/checklist']) {
+  for (const route of [
+    '',
+    '#/vuelos',
+    '#/hotel',
+    '#/calendario',
+    '#/calendario/2026-12-10',
+    '#/itinerarios',
+    '#/itinerarios/2026-12-09',
+    '#/itinerarios/2026-12-10',
+    '#/checklist',
+  ]) {
     test(`axe WCAG 2.2 AA: ${route || 'inicio'} (${scheme})`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: scheme });
       await page.goto(`/${route}`);

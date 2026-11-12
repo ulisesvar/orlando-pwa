@@ -1,6 +1,7 @@
 import { validateTrip } from './validate.js';
 import { startRouter } from './router.js';
 import { createChecklist } from './checklist.js';
+import { validateItineraries, createItineraryTracker } from './itinerary.js';
 import { storage } from './storage.js';
 import * as v from './views.js';
 import { isAuthorized, saveAuthorization, clearAuthorization, normalizeEmail } from './auth.js';
@@ -8,6 +9,8 @@ import { isAuthorized, saveAuthorization, clearAuthorization, normalizeEmail } f
 const root = document.getElementById('app');
 let trip = null;
 let checklist = null;
+let itineraries = null;
+let tracker = null;
 let allowedEmails = [];
 let persistentAccess = true;
 let currentRoute = { name: 'home' };
@@ -25,6 +28,12 @@ async function loadTrip() {
   const res = await fetch('./data/trip.json', { cache: 'no-cache' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return validateTrip(await res.json());
+}
+
+async function loadItineraries() {
+  const res = await fetch('./data/itineraries.json', { cache: 'no-cache' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return validateItineraries(await res.json());
 }
 
 let firstRender = true;
@@ -75,6 +84,11 @@ function render(route) {
       return mount(v.hotelView(trip), 'Hotel');
     case 'calendario':
       return mount(v.calendarView(trip, route.date), 'Calendario');
+    case 'itinerarios':
+      if (!itineraries) return mount(v.errorView('Los itinerarios no son válidos o no están disponibles.'), 'Error');
+      if (!route.date) return mount(v.itinerariesIndexView(itineraries.days, tracker), 'Itinerarios');
+      if (!itineraries.days.some((d) => d.date === route.date)) return mount(v.notFoundView(), 'No encontrada');
+      return mount(v.itineraryDayView(itineraries.days, route.date, tracker), 'Itinerario');
     case 'checklist':
       return renderChecklist();
     default:
@@ -123,6 +137,14 @@ try {
 } catch (e) {
   console.error(e instanceof Error ? e.message : e);
   trip = null;
+}
+// Los itinerarios fallan de forma independiente: el resto de la app sigue disponible.
+try {
+  itineraries = await loadItineraries();
+  tracker = createItineraryTracker(itineraries.days, storage);
+} catch (e) {
+  console.error(e instanceof Error ? e.message : e);
+  itineraries = null;
 }
 startRouter(render);
 registerServiceWorker();

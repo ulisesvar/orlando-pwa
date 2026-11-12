@@ -58,7 +58,8 @@ test.describe('service worker y offline', () => {
     for (const p of ['/', '/index.html', '/js/main.js', '/css/app.css', '/data/trip.json', '/manifest.webmanifest'])
       expect(cached).toContain(p);
     // Acceso familiar: módulo, lista y todos los módulos JS/JSON necesarios offline.
-    for (const p of ['/js/auth.js', '/data/access.json', '/js/views.js', '/js/validate.js']) expect(cached).toContain(p);
+    for (const p of ['/js/auth.js', '/js/itinerary.js', '/data/itineraries.json', '/data/access.json', '/js/views.js', '/js/validate.js'])
+      expect(cached).toContain(p);
     expect(cached).not.toContain('/sw.js');
   });
 
@@ -148,16 +149,24 @@ test.describe('acceso familiar sin conexión', () => {
       await page.goto('/');
       await page.getByLabel('Correo electrónico').fill('Adriana.Cano.Mejia@gmail.com ');
       await page.getByRole('button', { name: 'Entrar' }).click();
-      await expect(page.locator('a.card')).toHaveCount(4);
+      await expect(page.locator('a.card')).toHaveCount(5);
       await page.evaluate(() => navigator.serviceWorker.ready);
       await page.reload();
       await expect.poll(() => controlled(page)).toBe(true);
       await ctx.setOffline(true);
       await page.reload();
       await expect(page.getByLabel('Correo electrónico')).toHaveCount(0);
-      await expect(page.locator('a.card')).toHaveCount(4);
+      await expect(page.locator('a.card')).toHaveCount(5);
       await page.getByRole('link', { name: /Hotel/ }).click();
       await expect(page.getByText('2975 Arabian Nights Blvd')).toBeVisible();
+      // Itinerarios disponibles y con estado persistente sin conexión.
+      await page.goto('/#/itinerarios/2026-12-10');
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText("Mickey's Very Merry Christmas Party");
+      await page.getByRole('group', { name: 'Estado de Fuegos artificiales navideños' }).getByLabel('Completada').check();
+      await page.reload();
+      await expect(page.getByRole('group', { name: 'Estado de Fuegos artificiales navideños' }).getByLabel('Completada')).toBeChecked();
+      await page.goto('/#/itinerarios/2026-12-09');
+      await expect(page.locator('.it-item')).toHaveCount(17);
     } finally {
       await ctx.close();
     }

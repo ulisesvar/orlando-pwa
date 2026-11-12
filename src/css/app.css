@@ -519,3 +519,158 @@ a {
   border: 1px solid currentColor;
   border-radius: 8px;
 }
+
+/* Itinerarios */
+.it-tabs {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+}
+.it-tabs li {
+  flex: 1;
+}
+.it-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  width: 100%;
+  text-align: center;
+  padding: 8px;
+  font-weight: 600;
+}
+.warn-prov {
+  border-left: 4px solid var(--accent);
+  padding-left: 12px;
+}
+.it-progress {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+.it-bar {
+  width: 100%;
+  height: 10px;
+  accent-color: var(--brand);
+}
+.it-next {
+  margin: 8px 0 0;
+}
+.it-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.it-item {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 12px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.it-item.is-next {
+  border: 2px solid var(--focus);
+}
+.it-item.st-done {
+  border-left: 6px solid var(--brand);
+}
+.it-item.st-done .it-name {
+  text-decoration: line-through;
+}
+.it-item.st-skipped {
+  border-style: dashed;
+}
+.it-time {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.it-name {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+.it-body p {
+  margin: 6px 0;
+}
+.it-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.prio-imprescindible {
+  font-weight: 700;
+  border-color: var(--ink);
+}
+.prio-opcional {
+  color: var(--muted);
+}
+.tag-prov {
+  border-style: dashed;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.it-note {
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+.it-status {
+  display: flex;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.it-opt {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+.it-status input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+.it-status label {
+  flex: 1;
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+.it-status input:checked + label {
+  background: var(--brand);
+  color: var(--brand-ink);
+  border-color: var(--brand);
+  font-weight: 700;
+}
+.it-status input:focus-visible + label {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.inline-link {
+  color: inherit;
+}
