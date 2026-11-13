@@ -78,7 +78,21 @@ describe('enlaces de mapas', () => {
     );
   });
   it('Google Maps codifica la consulta', () => {
-    expect(googleMapsUrl('A&B=c')).toBe('https://www.google.com/maps/search/?api=1&query=A%26B%3Dc');
+    expect(googleMapsUrl('A&B=c')).toBe('https://www.google.com/maps/dir/?api=1&destination=A%26B%3Dc&travelmode=driving');
+  });
+  it('los enlaces del hotel piden ruta al resort por nombre y dirección, sin coordenadas inventadas', () => {
+    const dest = 'Vacation Village at Parkway, 2975 Arabian Nights Blvd, Kissimmee, FL 34747, USA';
+    expect(trip.hotel.mapQuery).toBe(dest);
+    const g = new URL(googleMapsUrl(trip.hotel.mapQuery));
+    expect(g.pathname).toBe('/maps/dir/');
+    expect(g.searchParams.get('api')).toBe('1');
+    expect(g.searchParams.get('destination')).toBe(dest);
+    expect(g.searchParams.get('travelmode')).toBe('driving');
+    expect(g.searchParams.has('origin')).toBe(false);
+    const w = new URL(wazeUrl(trip.hotel.mapQuery));
+    expect(w.searchParams.get('q')).toBe(dest);
+    expect(w.searchParams.get('navigate')).toBe('yes');
+    expect(w.searchParams.has('ll')).toBe(false);
   });
   it('una consulta maliciosa no puede alterar host ni parámetros', () => {
     const u = new URL(wazeUrl('x&navigate=no#@evil.com'));

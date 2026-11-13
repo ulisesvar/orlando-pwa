@@ -82,12 +82,15 @@ test.describe('hotel', () => {
     await expect(page.getByText('Kissimmee, Florida')).toBeVisible();
     const waze = page.getByRole('link', { name: /Ir con Waze/ });
     await expect(page.getByText('2975 Arabian Nights Blvd, Kissimmee, FL 34747, Estados Unidos')).toBeVisible();
-    await expect(waze).toHaveAttribute('href', /^https:\/\/waze\.com\/ul\?q=2975%20Arabian%20Nights%20Blvd.*34747.*&navigate=yes$/);
+    await expect(waze).toHaveAttribute('href', /^https:\/\/waze\.com\/ul\?q=Vacation%20Village%20at%20Parkway.*34747.*&navigate=yes$/);
     await expect(page.getByText(/check-?in|check-?out|checkout/i)).toHaveCount(0);
     await expect(waze).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(waze).toHaveAttribute('target', '_blank');
     const gm = page.getByRole('link', { name: /Google Maps/ });
-    await expect(gm).toHaveAttribute('href', /^https:\/\/www\.google\.com\/maps\/search\/\?api=1&query=2975%20Arabian%20Nights%20Blvd/);
+    await expect(gm).toHaveAttribute(
+      'href',
+      /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1&destination=Vacation%20Village%20at%20Parkway.*&travelmode=driving$/,
+    );
     await expect(gm).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(page.locator('main')).not.toContainText(/habitaci[oó]n n|reservaci[oó]n n/i);
   });
