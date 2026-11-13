@@ -78,7 +78,7 @@ describe('enlaces de mapas', () => {
     );
   });
   it('Google Maps codifica la consulta', () => {
-    expect(googleMapsUrl('A&B=c')).toBe('https://www.google.com/maps/search/?api=1&query=A%26B%3Dc');
+    expect(googleMapsUrl('A&B=c')).toBe('https://www.google.com/maps/dir/?api=1&destination=A%26B%3Dc&travelmode=driving');
   });
   it('una consulta maliciosa no puede alterar host ni parámetros', () => {
     const u = new URL(wazeUrl('x&navigate=no#@evil.com'));
