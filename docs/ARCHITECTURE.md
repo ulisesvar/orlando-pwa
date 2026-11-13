@@ -30,7 +30,8 @@ Datos: `src/data/trip.json` (única fuente). Estilos: `src/css/app.css` (tokens,
 
 `scripts/build.mjs` copia `src/` a `dist/`, calcula un hash SHA-256 de todo el contenido y lo escribe como `BUILD_ID` en `sw.js`, junto con la lista de precache. La caché se llama `orlando-<hash>`.
 
-1. `install`: descarga **todos** los recursos de la versión nueva a su propia caché (`cache: 'reload'`) y **queda en espera** (`waiting`): no se activa sola.2. Confirmación: tras «Actualizar ahora» la página envía `SKIP_WAITING` y el Service Worker llama a `skipWaiting()` (único punto donde se llama).
+1. `install`: descarga **todos** los recursos de la versión nueva a su propia caché (`cache: 'reload'`) y **queda en espera** (`waiting`): no se activa sola.
+2. Confirmación: tras «Actualizar ahora» la página envía `SKIP_WAITING` y el Service Worker llama a `skipWaiting()` (único punto donde se llama).
 3. `activate`: borra cualquier caché `orlando-*` distinta y toma el control.
 4. `fetch`: solo `GET` del mismo origen y dentro del scope; sirve únicamente de la caché de la versión activa y, si falta, de la red. No cachea en tiempo de ejecución (nada de otros dominios ni de rutas ajenas).
 5. `src/js/updater.js` recarga una vez en `controllerchange` (no en la primera instalación), de modo que HTML, JS y JSON nunca se mezclan entre versiones. El estado local (`localStorage`) sobrevive. Detalle en [ACTUALIZACION.md](ACTUALIZACION.md).
