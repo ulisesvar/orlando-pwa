@@ -141,9 +141,9 @@ export function hotelView(trip) {
       'div',
       { class: 'actions' },
       extLink(wazeUrl(ht.mapQuery), 'btn btn-primary', 'Ir con Waze'),
-      extLink(googleMapsUrl(ht.mapQuery), 'btn btn-secondary', 'Abrir en Google Maps'),
+      extLink(googleMapsUrl(ht.mapQuery), 'btn btn-secondary', 'Ir con Google Maps'),
     ),
-    h('p', { class: 'note' }, 'Los enlaces buscan el hotel por su dirección.'),
+    h('p', { class: 'note' }, 'Destino: Vacation Village at Parkway, 2975 Arabian Nights Blvd. Para el primer ingreso, confirma en el resort la ubicación de recepción del edificio 20. Desde México, Waze podría no calcular una ruta tan larga.'),
   );
 }
 
