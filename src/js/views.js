@@ -410,3 +410,19 @@ export function recorridoView(day, tracker) {
       : null,
   );
 }
+
+// Aviso discreto de actualización; no roba el foco y no bloquea la app.
+export function updateBanner({ onUpdate, onLater }) {
+  const update = h('button', { type: 'button', class: 'btn btn-primary', onclick: () => onUpdate(update) }, 'Actualizar ahora');
+  return h(
+    'div',
+    { class: 'update-banner' },
+    h('p', { class: 'update-text' }, h('strong', {}, 'Nueva versión disponible')),
+    h(
+      'div',
+      { class: 'update-actions' },
+      update,
+      h('button', { type: 'button', class: 'btn btn-secondary', onclick: onLater }, 'Más tarde'),
+    ),
+  );
+}

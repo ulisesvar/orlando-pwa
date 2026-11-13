@@ -35,7 +35,7 @@ tests/e2e       flujos de usuario, PWA/offline, accesibilidad
 tests/security  cabeceras, rutas, XSS, hardening estático
 infra/          nginx.conf y compose.yaml
 scripts/        build, servidor de desarrollo, iconos, verificación del contenedor
-docs/           ARCHITECTURE, SECURITY, TEST-PLAN, DEPLOYMENT, ROLLBACK, ITINERARIOS
+docs/           ARCHITECTURE, SECURITY, TEST-PLAN, DEPLOYMENT, ROLLBACK, ITINERARIOS, ACTUALIZACION
 ```
 
 ## Actualizar el itinerario

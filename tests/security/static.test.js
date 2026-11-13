@@ -51,6 +51,14 @@ describe('código del frontend (ASVS V1.3.2, V3.2.2)', () => {
     expect(sw).toMatch(/url\.origin !== SCOPE\.origin/);
     expect(sw).toMatch(/req\.method !== 'GET'/);
   });
+  it('el Service Worker no se activa solo: skipWaiting únicamente tras el mensaje de confirmación', () => {
+    const sw = read('src/sw.js');
+    const install = sw.slice(sw.indexOf("addEventListener('install'"), sw.indexOf("addEventListener('activate'"));
+    expect(install).not.toMatch(/skipWaiting\(/);
+    const calls = sw.match(/skipWaiting\(/g) ?? [];
+    expect(calls).toHaveLength(1);
+    expect(sw).toMatch(/event\.data\.type === 'SKIP_WAITING'\) self\.skipWaiting\(\)/);
+  });
 });
 
 describe('privacidad (datos del viaje)', () => {

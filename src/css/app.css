@@ -673,3 +673,40 @@ a {
 .inline-link {
   color: inherit;
 }
+
+/* Aviso de actualización */
+.update-banner {
+  position: fixed;
+  z-index: 10;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--surface);
+  border: 2px solid var(--brand);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 24px rgb(15 39 66 / 25%);
+}
+.update-text {
+  margin: 0;
+}
+.update-actions {
+  display: flex;
+  gap: 8px;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+}
+.update-actions .btn {
+  min-height: 44px;
+  padding-inline: 16px;
+}
+#update-slot:not(:empty) ~ main {
+  padding-bottom: 140px; /* el aviso fijo no debe tapar el final de la página */
+}

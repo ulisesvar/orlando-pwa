@@ -1,6 +1,7 @@
 import { validateTrip } from './validate.js';
 import { startRouter } from './router.js';
 import { createChecklist } from './checklist.js';
+import { createUpdater } from './updater.js';
 import { validateItineraries, createItineraryTracker } from './itinerary.js';
 import { storage } from './storage.js';
 import * as v from './views.js';
@@ -118,16 +119,30 @@ function renderChecklist() {
   mount(v.checklistView(trip, checklist, { onToggle, onReset, persistent: storage.persistent }), 'Checklist');
 }
 
-function registerServiceWorker() {
+function startUpdater() {
   if (!('serviceWorker' in navigator) || !window.isSecureContext) return;
-  const hadController = !!navigator.serviceWorker.controller;
-  let reloaded = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!hadController || reloaded) return; // primera instalación: no recargar
-    reloaded = true;
-    window.location.reload();
-  });
-  navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
+  const slot = document.getElementById('update-slot');
+  const clear = () => slot.replaceChildren();
+  createUpdater({
+    sw: navigator.serviceWorker,
+    doc: document,
+    isOnline: () => navigator.onLine,
+    reload: () => window.location.reload(),
+    onReady: ({ update, later }) =>
+      slot.replaceChildren(
+        v.updateBanner({
+          onUpdate: (button) => {
+            button.disabled = true;
+            button.textContent = 'Actualizando…';
+            if (!update()) clear();
+          },
+          onLater: () => {
+            later();
+            clear();
+          },
+        }),
+      ),
+  }).start(() => navigator.serviceWorker.register('./sw.js', { scope: './' }));
 }
 
 try {
@@ -147,4 +162,4 @@ try {
   itineraries = null;
 }
 startRouter(render);
-registerServiceWorker();
+startUpdater();
