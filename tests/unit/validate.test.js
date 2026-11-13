@@ -68,6 +68,11 @@ describe('validateTrip', () => {
         t.checklist[0].id = '"><img src=x>';
       }),
     ).toThrow(/identificador/));
+  it('actividad con mapa: exige text y mapQuery y rechaza claves extra (p. ej. url)', () => {
+    expect(bad((t) => (t.days[0].items[0] = { text: 'x' }))).toThrow(/mapQuery/);
+    expect(bad((t) => (t.days[0].items[0] = { text: 'x', mapQuery: 'y', url: 'https://evil.example' }))).toThrow(/url/);
+    expect(bad((t) => (t.days[0].items[0] = { text: 'x', mapQuery: ' ' }))).toThrow(/texto/);
+  });
   it('rechaza textos demasiado largos o vacíos', () => {
     expect(
       bad((t) => {

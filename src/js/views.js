@@ -120,6 +120,14 @@ export function flightsView(trip) {
   );
 }
 
+// Actividad del día: texto simple o texto con botón de Google Maps (ruta en coche).
+function agendaItem(item) {
+  if (typeof item === 'string') return h('li', {}, item);
+  const link = extLink(googleMapsUrl(item.mapQuery), 'btn btn-secondary', 'Ir con Google Maps');
+  link.setAttribute('aria-label', `Ir con Google Maps: ${item.text.replace(/\.$/, '')} (se abre en una pestaña nueva)`);
+  return h('li', {}, h('span', {}, item.text), h('div', { class: 'actions' }, link));
+}
+
 export function hotelView(trip) {
   const ht = trip.hotel;
   return page(
@@ -186,11 +194,7 @@ export function calendarView(trip, selected, recorrido = null) {
       { class: 'panel', 'aria-labelledby': 'day-h' },
       h('h2', { id: 'day-h' }, longDate(current.date)),
       h('p', { class: 'meta' }, current.short),
-      h(
-        'ul',
-        { class: 'agenda' },
-        current.items.map((t) => h('li', {}, t)),
-      ),
+      h('ul', { class: 'agenda' }, current.items.map(agendaItem)),
     ),
     recorrido ?? h('p', { class: 'note' }, 'No hay horarios definidos para las actividades; se agregarán cuando estén confirmados.'),
   );

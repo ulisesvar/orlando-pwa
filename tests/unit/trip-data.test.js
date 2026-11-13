@@ -94,6 +94,15 @@ describe('enlaces de mapas', () => {
     expect(w.searchParams.get('navigate')).toBe('yes');
     expect(w.searchParams.has('ll')).toBe(false);
   });
+  it('solo la compra en Walmart del 5 de diciembre lleva botón de navegación', () => {
+    const withMap = trip.days.flatMap((d) => d.items.filter((i) => typeof i === 'object').map((i) => [d.date, i]));
+    expect(withMap).toEqual([
+      ['2026-12-05', { text: 'Compras en Walmart.', mapQuery: 'Walmart Supercenter, 3250 Vineland Rd, Kissimmee, FL 34746, USA' }],
+    ]);
+    expect(googleMapsUrl(withMap[0][1].mapQuery)).toBe(
+      'https://www.google.com/maps/dir/?api=1&destination=Walmart%20Supercenter%2C%203250%20Vineland%20Rd%2C%20Kissimmee%2C%20FL%2034746%2C%20USA&travelmode=driving',
+    );
+  });
   it('una consulta maliciosa no puede alterar host ni parámetros', () => {
     const u = new URL(wazeUrl('x&navigate=no#@evil.com'));
     expect(u.host).toBe('waze.com');

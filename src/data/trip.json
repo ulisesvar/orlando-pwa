@@ -8,7 +8,12 @@
     {
       "date": "2026-12-05",
       "short": "Llegada / Walmart",
-      "items": ["Llegada a MCO.", "Recoger automóvil de Alamo.", "Traslado al hotel.", "Compras en Walmart."]
+      "items": [
+        "Llegada a MCO.",
+        "Recoger automóvil de Alamo.",
+        "Traslado al hotel.",
+        { "text": "Compras en Walmart.", "mapQuery": "Walmart Supercenter, 3250 Vineland Rd, Kissimmee, FL 34746, USA" }
+      ]
     },
     {
       "date": "2026-12-06",
