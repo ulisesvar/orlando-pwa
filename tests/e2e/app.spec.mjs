@@ -87,7 +87,10 @@ test.describe('hotel', () => {
     await expect(waze).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(waze).toHaveAttribute('target', '_blank');
     const gm = page.getByRole('link', { name: /Google Maps/ });
-    await expect(gm).toHaveAttribute('href', /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1&destination=Vacation%20Village%20at%20Parkway.*&travelmode=driving$/);
+    await expect(gm).toHaveAttribute(
+      'href',
+      /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1&destination=Vacation%20Village%20at%20Parkway.*&travelmode=driving$/,
+    );
     await expect(gm).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(page.locator('main')).not.toContainText(/habitaci[oó]n n|reservaci[oó]n n/i);
   });

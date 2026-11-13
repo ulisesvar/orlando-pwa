@@ -143,7 +143,11 @@ export function hotelView(trip) {
       extLink(wazeUrl(ht.mapQuery), 'btn btn-primary', 'Ir con Waze'),
       extLink(googleMapsUrl(ht.mapQuery), 'btn btn-secondary', 'Ir con Google Maps'),
     ),
-    h('p', { class: 'note' }, 'Los botones solicitan navegación al resort. Confirma con el hotel el acceso a la recepción del edificio 20; Waze podría no calcular rutas desde México.'),
+    h(
+      'p',
+      { class: 'note' },
+      'Los botones piden la ruta en coche a Vacation Village at Parkway por su nombre y dirección. No fijan la recepción del edificio 20: confirma con el hotel el acceso exacto.',
+    ),
   );
 }
 

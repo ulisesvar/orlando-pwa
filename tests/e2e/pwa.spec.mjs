@@ -331,7 +331,7 @@ test.describe('acceso familiar sin conexión', () => {
       await expect(page.getByLabel('Correo electrónico')).toHaveCount(0);
       await expect(page.locator('a.card')).toHaveCount(4);
       await page.getByRole('link', { name: /Hotel/ }).click();
-      await expect(page.getByText('2975 Arabian Nights Blvd', { exact: true })).toBeVisible();
+      await expect(page.getByText('2975 Arabian Nights Blvd, Kissimmee, FL 34747, Estados Unidos', { exact: true })).toBeVisible();
       // Recorrido (dentro de Calendario) disponible y con estado persistente sin conexión.
       await page.goto('/#/calendario/2026-12-10');
       await expect(page.getByRole('heading', { level: 2, name: /Recorrido: Mickey's Very Merry Christmas Party/ })).toBeVisible();
