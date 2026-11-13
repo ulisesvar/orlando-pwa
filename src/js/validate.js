@@ -68,7 +68,15 @@ export function validateTrip(data) {
       str(d.short, `${p}.short`, 40);
       if (seen.has(d.date)) err(p, 'fecha duplicada');
       seen.add(d.date);
-      if (arr(d.items, `${p}.items`, 1, 20)) d.items.forEach((t, j) => str(t, `${p}.items[${j}]`, 200));
+      if (arr(d.items, `${p}.items`, 1, 20))
+        d.items.forEach((t, j) => {
+          const q = `${p}.items[${j}]`;
+          if (!isObj(t)) return str(t, q, 200);
+          // Actividad con navegación: texto + destino (la URL se genera en links.js, nunca viene de los datos).
+          keys(t, q, ['text', 'mapQuery']);
+          str(t.text, `${q}.text`, 200);
+          str(t.mapQuery, `${q}.mapQuery`, 200);
+        });
       if (
         isRealDate(d.date) &&
         isRealDate(data.startDate) &&

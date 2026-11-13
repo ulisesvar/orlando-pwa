@@ -396,6 +396,9 @@ a {
   padding-left: 20px;
   position: relative;
 }
+.agenda .actions {
+  margin: 8px 0 0;
+}
 .agenda li::before {
   content: '';
   position: absolute;

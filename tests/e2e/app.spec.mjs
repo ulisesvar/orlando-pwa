@@ -116,6 +116,26 @@ test.describe('calendario', () => {
     await page.getByRole('link', { name: 'Miércoles 9' }).click();
     await expect(page.locator('.agenda li')).toHaveText(['Magic Kingdom.']);
   });
+  test('Walmart del sábado 5 tiene botón de Google Maps (ruta en coche) y ninguna otra actividad', async ({ page }) => {
+    await page.goto('/#/calendario/2026-12-05');
+    await expect(page.locator('.agenda li')).toHaveCount(4);
+    const maps = page.locator('.agenda a');
+    await expect(maps).toHaveCount(1);
+    await expect(page.locator('.agenda li').nth(3)).toContainText('Compras en Walmart.');
+    await expect(page.locator('.agenda li').nth(3).locator('a')).toHaveCount(1);
+    await expect(maps).toHaveAccessibleName(/Ir con Google Maps: Compras en Walmart/);
+    await expect(maps).toHaveAttribute(
+      'href',
+      'https://www.google.com/maps/dir/?api=1&destination=Walmart%20Supercenter%2C%203250%20Vineland%20Rd%2C%20Kissimmee%2C%20FL%2034746%2C%20USA&travelmode=driving',
+    );
+    await expect(maps).toHaveAttribute('target', '_blank');
+    await expect(maps).toHaveAttribute('rel', 'noopener noreferrer');
+    for (const d of ['2026-12-06', '2026-12-07', '2026-12-08', '2026-12-09', '2026-12-10', '2026-12-11']) {
+      await page.goto(`/#/calendario/${d}`);
+      await expect(page.locator('.agenda li').first()).toBeVisible();
+      await expect(page.locator('.agenda a')).toHaveCount(0);
+    }
+  });
   test('un día inexistente muestra página no encontrada', async ({ page }) => {
     await page.goto('/#/calendario/2026-02-31');
     await expect(page.getByRole('heading', { name: 'Página no encontrada' })).toBeVisible();
